@@ -3,7 +3,9 @@ Name: Molly Johnson
 ONID: johnsmol
 CS 344 Winter 2019
 Assignment 3
-Due: 11/14/18
+Due: 3/3/19
+Adapted from my own work 11/14/18 (took the class in the Fall 2018 term
+#but am retaking this term for a better grade)
 */
 
 To compile my smallsh.c code, make sure smallsh.c and the included makefile are in the same directory
