@@ -10,4 +10,7 @@ smallsh: smallsh.c
 	gcc -std=c99 -Wall -g -o smallsh smallsh.c
 
 clean:
-	rm smallsh
+	rm smallsh out* junk*
+
+cleanall:
+	rm smallsh out* junk*

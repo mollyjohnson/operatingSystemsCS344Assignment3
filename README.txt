@@ -1,7 +1,7 @@
 /*
 Name: Molly Johnson
 ONID: johnsmol
-CS 344 Fall 2018
+CS 344 Winter 2019
 Assignment 3
 Due: 11/14/18
 */
