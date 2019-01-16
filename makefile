@@ -10,9 +10,14 @@ all: smallsh
 # -std=c99 allowed for this assignment per the assignment 3 instructions
 smallsh: smallsh.c
 	gcc -std=c99 -Wall -g -o smallsh smallsh.c
+	
+#for use on makefile turned in (don't delete any created files)
+#clean:
+#rm -f smallsh
 
+#for use on makefile during development/testing
 clean:
-	rm smallsh out* junk*
+	rm -f smallsh out* junk*
 
 cleanall:
-	rm smallsh out* junk*
+	rm -f smallsh out* junk*
