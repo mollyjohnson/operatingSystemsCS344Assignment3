@@ -32,6 +32,7 @@ am retaking this term for a better grade)
 #include <errno.h>
 
 //constant macro definitions
+//max values for chars and args were determined by the CS344 assignment3 instructions
 #define MAX_CHARS 2048
 #define MAX_ARGS 512
 #define EXIT "exit"
