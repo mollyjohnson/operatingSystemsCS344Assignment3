@@ -3,9 +3,8 @@ Name: Molly Johnson
 ONID: johnsmol
 CS 344 Winter 2019
 Due: 3/3/19
-All information used to create this code is adapted from the OSU CS 344 Fall 2018
-lectures, assignment instructions/hints, and some of my own work from Assignment 2 from 
-this class unless otherwise specifically indicated.
+All information used to create this code is adapted from the OSU CS 344 Winter 2019
+lectures and assignment instructions/hints unless otherwise specifically indicated.
 Note: Also adapted from my own work from 11/14/18 (took the class in the Fall 2018 term but
 am retaking this term for a better grade)
 */
