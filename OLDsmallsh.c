@@ -1,13 +1,11 @@
 /*
 Name: Molly Johnson
 ONID: johnsmol
-CS 344 Winter 2019
-Due: 3/3/19
+CS 344 Fall 2018
+Due: 11/14/18
 All information used to create this code is adapted from the OSU CS 344 Fall 2018
 lectures, assignment instructions/hints, and my own work from Assignment 2 from this
 class unless otherwise specifically indicated.
-Note: Also adapted from my own work from 11/14/18 (took the class in the Fall 2018 term but
-am retaking this term for a better grade)
 */
 
 //added before #include <stdio.h> to prevent "implicit function declaration" warnings
@@ -41,11 +39,10 @@ am retaking this term for a better grade)
 #define TRUE 1
 #define INVALID "INVALID"
 
-//global variable
-int exitStatus = 0;
-//flag for if background mode possible (if SIGSTP command given,
-//should ignore "&" and just run foreground commands)
-int backgroundPossible = TRUE;
+//global variables
+int exitStatus = 0; //exit status for the program. set to 0 to start with by default
+int backgroundPossible = TRUE; //flag for if background mode is possible (if SIGSTP command given, should ignore "&" and just run foreground commands)
+
 
 //function declarations
 void catchSIGINT(int signo);
@@ -78,7 +75,6 @@ void statusBuiltIn()
 	//https://www.ibm.com/support/knowledgecenter/en/SSB23S_1.1.0.15/gtpc2/cpp_wtermsig.html and
 	//https://www.ibm.com/support/knowledgecenter/en/SSB23S_1.1.0.15/gtpc2/cpp_wexitstatus.html
 	//and lecture (only either WIFEXITED or WTERMSIG macros will be non zero, not both)				
-	/*
 	if(WIFEXITED(exitStatus)!=0) //returns not 0 if process exited normally
 	{
 		//if no foreground command has been called yet, the value of statusIn passed in will just be 0, so is
@@ -93,7 +89,6 @@ void statusBuiltIn()
 		printf("Signal code was: %d\n", termSignal);
 		fflush(stdout);
 	}
-	*/
 }
 
 /*
@@ -132,16 +127,6 @@ void changeDirBuiltInWithArg(char **argArray)
 	//https://linux.die.net/man/2/chdir
 	//info on how to check if chdir() was successful or not adapted from:
 	//https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.3.0/com.ibm.zos.v2r3.bpxbd00/rtchd.htm
-
-	int changeStatus = chdir(argArray[1]);
-
-	if(changeStatus != 0) //0 means chdir to the specified directory was successful
-	{
-		perror("chdir() to your specified directory has failed, no such directory is there.\n");
-		fflush(stdout);
-	}
-
-	/*
 	if(chdir(argArray[1]) != 0)
 	{
 		perror("chdir() to your specified directory has failed, no such directory here\n");
@@ -151,7 +136,6 @@ void changeDirBuiltInWithArg(char **argArray)
 	{
 		chdir(argArray[1]);
 	}
-	*/
 }
 
 /*
@@ -318,7 +302,7 @@ void argExpand(char **argsArrayIn, int argCounter)
 {
 	for(int k = 0; k < argCounter; k++)
 	{
-		//check for each occurrence of 2 $$ signs in all args (if == NULL, "$$" is not found)
+		//check for each occurrence of 2 $$ signs in all args
 		if(strstr(argsArrayIn[k], "$$") != NULL)
 		{
 			char *str;
