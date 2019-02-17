@@ -35,7 +35,7 @@ in the assignment instructions.
 
 //constant macro definitions
 //max values for chars and args were determined by the CS344 assignment3 instructions
-//(max chars is actually 2048 but added one for the null terminator)
+//(max chars is actually 2048 but i added one for the null terminator)
 #define MAX_CHARS 2049
 #define MAX_ARGS 512
 #define EXIT "exit"
@@ -78,38 +78,14 @@ SYNOPSIS
 DESCRIPTION
 
 */
-void InitializeString(char *stringIn, int numChars)
-{
-	//malloc the string for the num of chars specified
-	stringIn = (char *)malloc(numChars * sizeof(char));
-
-	//check malloc was successful (NULL means unsuccessful)
-	if(stringIn == NULL)
-	{
-		printf("error, unable to allocate memory for string\n");
-		fflush(stdout);
-		exit(1);
-	}
-
-	//if allocated successfully, memset the string to null terminator chars
-	memset(stringIn, '\0', sizeof(stringIn));
-}
-
-/*
-NAME
-
-SYNOPSIS
-
-DESCRIPTION
-
-*/
-int main()
-{
+int main(){
 	//create string for user input
-	char *userInput;
-
-	//initialize user input string so it's malloc'd for the right num of chars and memset it to null terminators
-	InitializeString(userInput, MAX_CHARS);
+	char *userInput = malloc(MAX_CHARS * sizeof(char));
+	if(userInput == NULL){
+		printf("ERROR, UNABLE TO ALLOCATE MEMORY FOR USER INPUT\n");
+		fflush(stdout); exit(1);
+	}
+	memset(userInput, '\0', sizeof(userInput));
 
 	//get user input as long as the user hasn't entered "exit"
 	/*do
