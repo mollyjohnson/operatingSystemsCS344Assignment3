@@ -104,6 +104,12 @@ DESCRIPTION
 */
 void GetArgs(char **argsIn, char *userInputString){
 
+	//argsIn[argCount - 1] = malloc(MAX_CHARS * sizeof(char));
+	//if(argsIn[argCount-1] == NULL){
+	//printf("INPUT ARGS MALLOC ERROR\n");
+	//fflush(stdout);
+	//exit(1);
+
 }
 
 /*
