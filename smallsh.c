@@ -102,6 +102,133 @@ SYNOPSIS
 DESCRIPTION
 
 */
+char *GetPID(){
+	//static so will remain after function exits
+	static char returnStringPID[] = "";
+	
+	//get parent process pid int
+	int pid = getpid();	
+	printf("the RAW pid is: %d\n", pid);
+
+	//convert int pid into string pid
+	int length = snprintf(NULL, 0, "%d", pid);
+	fflush(stdout);
+	char *stringPID = malloc(length + 1);
+	if(stringPID == NULL){
+		printf("ERROR, NOT ALLOCATED\n");
+		fflush(stdout);
+		exit(1);
+	}
+	snprintf(stringPID, length + 1, "%d", pid);
+	fflush(stdout);
+	char *copyStringPID = stringPID;
+	strcpy(returnStringPID, copyStringPID);
+
+	//free memory
+	free(stringPID);
+	stringPID = NULL;
+
+	//return string version of the int pid
+	return returnStringPID;
+
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+char *ReplaceString(char *str, char *orig, char *rep){
+	char *result;
+	int i = 0;
+	int cnt = 0;
+
+	//save lengths of the replacement substring (pid) and the original substring ("$$")
+	int newWlen = strlen(rep);
+	int oldWlen = strlen(orig);
+
+	//go through each char in the original long string, to check for occurrences of the original substring ("$$")
+	for(i = 0; str[i] != '\0'; i++){
+		if (strstr(&str[i], orig) == &str[i]){
+			cnt++;
+			i += oldWlen - 1;
+		}
+	}
+
+	result = (char *)malloc(i + cnt *(newWlen - oldWlen) + 1);
+	i = 0;
+
+	//replace each occurrence of the orig substring("$$") with the new subtsring (pid)
+	while (*str){
+		if(strstr(str, orig) == str){
+			strcpy(&result[i], rep);
+			i += newWlen;
+			str += oldWlen;
+		}
+		else{
+			result[i++] = *str++;
+		}
+	}
+
+	//set result to a new string to be returned so result memory can be freed
+	result[i] = '\0';
+	static char returnStr[MAX_CHARS + 1];
+	memset(returnStr, '\0', sizeof(returnStr));
+	strcpy(returnStr, result);
+
+	//free memory
+	free(result);
+	result = NULL;
+
+	//return newly expanded string
+	return returnStr;
+
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void CommandOrFileExpand(char *commandOrFile){
+	char *str;
+	char *orig;
+	char *rep;
+	str = (char*)malloc((MAX_CHARS) * sizeof(char));
+	orig = (char*)malloc((MAX_CHARS) * sizeof(char));
+	rep = (char*)malloc((MAX_CHARS) * sizeof(char));
+
+	char *pid = GetPID();
+	strcpy(str, commandOrFile);
+	strcpy(orig, "$$");
+	strcpy(rep, pid);
+
+	char *newStr = ReplaceString(str, orig, rep);
+
+	strcpy(commandOrFile, newStr);
+
+	free(str);
+	str = NULL;
+	free(orig);
+	orig = NULL;
+	free(rep);
+	rep = NULL;
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
 int StringMatch(char *string1, char *string2){
 	if(strcmp(string1, string2) == 0){
 		return TRUE;
@@ -148,12 +275,12 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 			else{
 				if(isInFile == TRUE){
 					strcpy(inputFileIn, token);
-					//CommandOrFileExpand(inputFileIn);
+					CommandOrFileExpand(inputFileIn);
 					isInFile = FALSE;
 				}
 				else if(isOutFile == TRUE){
 					strcpy(outputFileIn, token);
-					//CommandOrFileExpand(outputFileIn);
+					CommandOrFileExpand(outputFileIn);
 					isOutFile = FALSE;
 				}
 				else{
