@@ -146,16 +146,29 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 				isOutFile = TRUE;	
 			}
 			else{
-				parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
-
-				if(parsedInput[inputCount] == NULL){
-					printf("USER INPUT MALLOC ERROR\n");
-					fflush(stdout); exit(1);
+				if(isInFile == TRUE){
+					strcpy(inputFileIn, token);
+					//CommandOrFileExpand(inputFileIn);
+					isInFile = FALSE;
 				}
+				else if(isOutFile == TRUE){
+					strcpy(outputFileIn, token);
+					//CommandOrFileExpand(outputFileIn);
+					isOutFile = FALSE;
+				}
+				else{
+					parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
 
-				strcpy(parsedInput[inputCount], token);
+					if(parsedInput[inputCount] == NULL){
+						printf("USER INPUT MALLOC ERROR\n");
+						fflush(stdout); exit(1);
+					}
 
-				inputCount++;
+					strcpy(parsedInput[inputCount], token);
+
+					inputCount++;
+				}
+				
 			}
 		}
 	}
@@ -199,6 +212,13 @@ int main(){
 
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
+
+		printf("command: %s\n", parsedUserInput[0]);
+		for(int k = 1; k < numInputs; k++){
+			printf("arg %d: %s\n", k, parsedUserInput[k]);
+		}
+		printf("input file: %s\n", inputFile);
+		printf("output file %s\n", outputFile);
 
 		for(int i = 0; i < numInputs; i++){
 			free(parsedUserInput[i]);
