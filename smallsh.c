@@ -172,6 +172,16 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 			}
 		}
 	}
+
+	if(inputCount > 1){
+		if(StringMatch(parsedInput[inputCount-1], "&") == TRUE){
+			*isBackgroundBool = TRUE;
+			free(parsedInput[inputCount - 1]);
+			parsedInput[inputCount - 1] = NULL;
+			inputCount--;
+		}
+	}
+
 	return inputCount;
 }
 
@@ -219,6 +229,7 @@ int main(){
 		}
 		printf("input file: %s\n", inputFile);
 		printf("output file %s\n", outputFile);
+		printf("background status is: %d\n", isBackground);
 
 		for(int i = 0; i < numInputs; i++){
 			free(parsedUserInput[i]);
