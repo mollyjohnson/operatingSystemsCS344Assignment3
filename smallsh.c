@@ -260,6 +260,9 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 	}
 
 	strcpy(parsedInput[inputCount], token);
+	if(strstr(parsedInput[inputCount], "$$") != NULL){
+		VariableExpand(parsedInput[inputCount]);
+	}
 	inputCount++;
 
 	while(token != NULL){
