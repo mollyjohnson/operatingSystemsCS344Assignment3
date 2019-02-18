@@ -117,7 +117,7 @@ SYNOPSIS
 DESCRIPTION
 
 */
-int GetArgs(char **parsedInput, char *userInputString, int totalInputCount){
+int GetArgs(char **parsedInput, char *userInputString){
 
 	//argsIn[argCount - 1] = malloc(MAX_CHARS * sizeof(char));
 	//if(argsIn[argCount-1] == NULL){
@@ -132,13 +132,13 @@ int GetArgs(char **parsedInput, char *userInputString, int totalInputCount){
 	char *space = " ";
 	char *token;
 	token = strtok(userInputString, space);
-	parsedInput[totalInputCount] = malloc((MAX_CHARS) * sizeof(char));
-	if(parsedInput[totalInputCount] == NULL){
+	parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
+	if(parsedInput[inputCount] == NULL){
 		printf("USER INPUT MALLOC ERROR\n");
 		fflush(stdout);
 		exit(1);
 	}
-	strcpy(parsedInput[totalInputCount], token);
+	strcpy(parsedInput[inputCount], token);
 	inputCount++;
 
 	while(token != NULL){
@@ -153,8 +153,7 @@ int GetArgs(char **parsedInput, char *userInputString, int totalInputCount){
 			else{
 				printf("is neither input nor output\n");
 
-
-				parsedInput[totalInputCount + inputCount] = malloc((MAX_CHARS) * sizeof(char));
+				parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
 				inputCount++;
 			}
 		}
@@ -171,36 +170,36 @@ DESCRIPTION
 
 */
 int main(){
-	//create string of max chars allowed for user input and memset to null terminators
-	char userInputStr[MAX_CHARS];
-	memset(userInputStr, '\0', sizeof(userInputStr));
-	char **parsedUserInput= malloc((MAX_ARGS) * sizeof(char*));
-	if(parsedUserInput == NULL){
-		printf("USER INPUT MALLOC ERROR\n");
-		fflush(stdout);
-		exit(1);
-	}
-	int numInputs = 0;
-	int totalInputs = 0;
+	
 	//get user input as long as the user hasn't entered "exit"
+	char command[MAX_CHARS];
 	do{
+		char userInputStr[MAX_CHARS];
+		memset(userInputStr, '\0', sizeof(userInputStr));
+		char **parsedUserInput= malloc((MAX_ARGS) * sizeof(char*));
+		if(parsedUserInput == NULL){
+			printf("USER INPUT MALLOC ERROR\n");
+			fflush(stdout); exit(1);
+		}
+
 		printf(": ");
 		fflush(stdout);
+
 		GetInputString(userInputStr);
-		numInputs = GetArgs(parsedUserInput, userInputStr, totalInputs);
+		int numInputs = GetArgs(parsedUserInput, userInputStr);
 		printf("num inputs was: %d\n", numInputs);
-		totalInputs += numInputs;
-	}while(strcmp(userInputStr, "exit") != 0);
+		memset(command, '\0', sizeof(command));
+		strcpy(command, parsedUserInput[0]);
+		printf("command was: %s\n", command);
+		for(int i = 0; i < numInputs; i++){
+			free(parsedUserInput[i]);
+			parsedUserInput[i] = NULL;
+		}
+		free(parsedUserInput);
+		parsedUserInput= NULL;
+	}while(strcmp(command, "exit") != 0);
 	//}while(IsExit(userInput) == FALSE);
-
-	printf("total num of inputs was: %d\n", totalInputs);
-	for(int i = 0; i < totalInputs; i++){
-		free(parsedUserInput[i]);
-		parsedUserInput[i] = NULL;
-
-	}	
-	free(parsedUserInput);
-	parsedUserInput= NULL;
 		
+			
 	return 0;
 }
