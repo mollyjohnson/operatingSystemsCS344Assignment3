@@ -195,7 +195,7 @@ SYNOPSIS
 DESCRIPTION
 
 */
-void FileExpand(char *fileNameIn){
+void VariableExpand(char *varIn){
 	char *str;
 	char *orig;
 	char *rep;
@@ -204,13 +204,13 @@ void FileExpand(char *fileNameIn){
 	rep = (char*)malloc((MAX_CHARS) * sizeof(char));
 
 	char *pid = GetPID();
-	strcpy(str, fileNameIn);
+	strcpy(str, varIn);
 	strcpy(orig, "$$");
 	strcpy(rep, pid);
 
 	char *newStr = ReplaceString(str, orig, rep);
 
-	strcpy(fileNameIn, newStr);
+	strcpy(varIn, newStr);
 
 	free(str);
 	str = NULL;
@@ -274,12 +274,19 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 			else{
 				if(isInFile == TRUE){
 					strcpy(inputFileIn, token);
-					FileExpand(inputFileIn);
+
+					if(strstr(inputFileIn, "$$") != NULL){
+						VariableExpand(inputFileIn);
+					}
 					isInFile = FALSE;
 				}
 				else if(isOutFile == TRUE){
 					strcpy(outputFileIn, token);
-					FileExpand(outputFileIn);
+
+					if(strstr(outputFileIn, "$$") != NULL){
+						VariableExpand(outputFileIn);
+					}
+
 					isOutFile = FALSE;
 				}
 				else{
@@ -291,6 +298,10 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 					}
 
 					strcpy(parsedInput[inputCount], token);
+
+					if(strstr(parsedInput[inputCount], "$$") != NULL){
+						VariableExpand(parsedInput[inputCount]);
+					}
 
 					inputCount++;
 				}
