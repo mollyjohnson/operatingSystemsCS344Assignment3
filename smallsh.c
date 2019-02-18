@@ -35,9 +35,11 @@ in the assignment instructions.
 
 //constant macro definitions
 //max values for chars and args were determined by the CS344 assignment3 instructions
-//(max chars is actually 2048 but i added one additional char for the null terminator)
+//(max chars is actually 2048 but i added one additional char for the null terminator).
+//(max args is actually 2048 but i added one additional arg for the NULL arg req'd to null-terminate
+//an array sent to execvp() so execvp() knows when the end of the array has been reached).
 #define MAX_CHARS 2049
-#define MAX_ARGS 512
+#define MAX_ARGS 513
 #define EXIT "exit"
 #define CD "cd"
 #define STATUS "status"
@@ -67,6 +69,7 @@ DESCRIPTION
 
 */
 void GetInputString(char *userInputString){
+	//getline use adapted from my own work in OSU CS 344 Winter 2019 Assignment 2
 	char *buffer;
 	size_t bufsize = MAX_CHARS;
 	size_t characters;
@@ -96,16 +99,14 @@ int main(){
 	//create string of max chars allowed for user input and memset to null terminators
 	char userInput[MAX_CHARS];
 	memset(userInput, '\0', sizeof(userInput));
+	char inputArgs[MAX_ARGS][MAX_CHARS];
+	memset(inputArgs, '\0', sizeof(inputArgs));
 
 	//get user input as long as the user hasn't entered "exit"
-	do
-	{
+	do{
 		printf(": ");
-
 		GetInputString(userInput);
-
-		printf("%s\n", userInput);
-	}while(strcmp(userInput, "exit") != 0);
+	}while(strcmp(inputArgs[0], "exit") != 0);
 	//}while(IsExit(userInput) == FALSE);
 		
 	return 0;
