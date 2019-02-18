@@ -46,7 +46,7 @@ in the assignment instructions.
 #define INVALID "INVALID"
 
 //global variables
-
+/*
 //flag for if background is possible (if SIGSTP command given, should ignore "&" and
 //just run it as a foreground command)
 int backgroundPossibleGlobal = TRUE;
@@ -54,6 +54,7 @@ int backgroundPossibleGlobal = TRUE;
 //exit status for the program. set to 0 to start w/ by default, can be changed if program
 //encounters errors and needs to exit w/ a non-zero status
 int exitStatusGlobal = 0;
+*/
 
 //function declarations
 
@@ -65,9 +66,22 @@ SYNOPSIS
 DESCRIPTION
 
 */
-void GetInputString(char *userInputString)
-{
-	
+void GetInputString(char *userInputString){
+	char *buffer;
+	size_t bufsize = MAX_CHARS;
+	size_t characters;
+	buffer = (char *)malloc(bufsize * sizeof(char));
+	if(buffer == NULL){
+		printf("GETLINE BUFFER ERROR, UNABLE TO ALLOCATE\n");
+		fflush(stdout);
+		exit(1);
+	}
+	characters = getline(&buffer, &bufsize, stdin);
+	buffer[strcspn(buffer, "\n")] = '\0';
+
+	strcpy(userInputString, buffer);
+	free(buffer);
+	buffer = NULL;
 }
 
 /*
@@ -84,14 +98,15 @@ int main(){
 	memset(userInput, '\0', sizeof(userInput));
 
 	//get user input as long as the user hasn't entered "exit"
-	/*do
+	do
 	{
-		GetInput(userInput);
+		printf(": ");
 
-	}while(
-	*/
+		GetInputString(userInput);
 
-	//GetInputString(userInput);
-	
+		printf("%s\n", userInput);
+	}while(strcmp(userInput, "exit") != 0);
+	//}while(IsExit(userInput) == FALSE);
+		
 	return 0;
 }
