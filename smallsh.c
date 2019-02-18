@@ -79,12 +79,31 @@ void GetInputString(char *userInputString){
 		fflush(stdout);
 		exit(1);
 	}
-	characters = getline(&buffer, &bufsize, stdin);
+	while(1){
+		characters = getline(&buffer, &bufsize, stdin);
+		if(characters == -1){
+			clearerr(stdin);
+		}
+		else{
+			break;
+		}
+	}
 	buffer[strcspn(buffer, "\n")] = '\0';
-
 	strcpy(userInputString, buffer);
 	free(buffer);
 	buffer = NULL;
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void GetArgs(char **argsIn, char *userInputString){
+
 }
 
 /*
@@ -99,15 +118,24 @@ int main(){
 	//create string of max chars allowed for user input and memset to null terminators
 	char userInput[MAX_CHARS];
 	memset(userInput, '\0', sizeof(userInput));
-	char inputArgs[MAX_ARGS][MAX_CHARS];
-	memset(inputArgs, '\0', sizeof(inputArgs));
+	char **inputArgs = malloc((MAX_ARGS) * sizeof(char*));
+	if(inputArgs == NULL){
+		printf("INPUT ARGS MALLOC ERROR\n");
+		fflush(stdout);
+		exit(1);
+	}
 
 	//get user input as long as the user hasn't entered "exit"
 	do{
 		printf(": ");
+		fflush(stdout);
 		GetInputString(userInput);
-	}while(strcmp(inputArgs[0], "exit") != 0);
+		GetArgs(inputArgs, userInput);
+	}while(strcmp(userInput, "exit") != 0);
 	//}while(IsExit(userInput) == FALSE);
+
+	free(inputArgs);
+	inputArgs = NULL;
 		
 	return 0;
 }
