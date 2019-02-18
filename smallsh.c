@@ -117,7 +117,7 @@ SYNOPSIS
 DESCRIPTION
 
 */
-int GetArgs(char **parsedInput, char *userInputString){
+int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *outputFileIn, int *isBackgroundBool){
 	int inputCount = 0;
 	int isOutFile = FALSE;
 	int isInFile = FALSE;
@@ -140,13 +140,21 @@ int GetArgs(char **parsedInput, char *userInputString){
 		token = strtok(NULL, space);
 		if(token != NULL){
 			if(StringMatch(token, "<") == TRUE){
-		
+				isInFile = TRUE;		
 			}
 			else if(StringMatch(token, ">") == TRUE){
-	
+				isOutFile = TRUE;	
 			}
 			else{
 				parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
+
+				if(parsedInput[inputCount] == NULL){
+					printf("USER INPUT MALLOC ERROR\n");
+					fflush(stdout); exit(1);
+				}
+
+				strcpy(parsedInput[inputCount], token);
+
 				inputCount++;
 			}
 		}
@@ -167,6 +175,12 @@ int main(){
 	//get user input as long as the user hasn't entered "exit"
 	char command[MAX_CHARS];
 	do{
+		char inputFile[MAX_CHARS];
+		memset(inputFile, '\0', sizeof(inputFile));
+		char outputFile[MAX_CHARS];
+		memset(outputFile, '\0', sizeof(outputFile));
+		int isBackground = FALSE;
+
 		char userInputStr[MAX_CHARS];
 		memset(userInputStr, '\0', sizeof(userInputStr));
 
@@ -181,7 +195,7 @@ int main(){
 
 		GetInputString(userInputStr);
 
-		int numInputs = GetArgs(parsedUserInput, userInputStr);
+		int numInputs = GetArgs(parsedUserInput, userInputStr, inputFile, outputFile, &isBackground);
 
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
