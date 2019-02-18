@@ -60,6 +60,7 @@ int exitStatusGlobal = 0;
 
 //function declarations
 
+
 /*
 NAME
 
@@ -118,26 +119,22 @@ DESCRIPTION
 
 */
 int GetArgs(char **parsedInput, char *userInputString){
-
-	//argsIn[argCount - 1] = malloc(MAX_CHARS * sizeof(char));
-	//if(argsIn[argCount-1] == NULL){
-	//printf("INPUT ARGS MALLOC ERROR\n");
-	//fflush(stdout);
-	//exit(1);
 	int inputCount = 0;
 	int isOutFile = FALSE;
 	int isInFile = FALSE;
 	int isBackground = FALSE;
-
 	char *space = " ";
 	char *token;
+
 	token = strtok(userInputString, space);
 	parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
+
 	if(parsedInput[inputCount] == NULL){
 		printf("USER INPUT MALLOC ERROR\n");
 		fflush(stdout);
 		exit(1);
 	}
+
 	strcpy(parsedInput[inputCount], token);
 	inputCount++;
 
@@ -145,14 +142,12 @@ int GetArgs(char **parsedInput, char *userInputString){
 		token = strtok(NULL, space);
 		if(token != NULL){
 			if(StringMatch(token, "<") == TRUE){
-				printf("is input\n");
+		
 			}
 			else if(StringMatch(token, ">") == TRUE){
-				printf("is output\n");
+	
 			}
 			else{
-				printf("is neither input nor output\n");
-
 				parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
 				inputCount++;
 			}
@@ -176,6 +171,7 @@ int main(){
 	do{
 		char userInputStr[MAX_CHARS];
 		memset(userInputStr, '\0', sizeof(userInputStr));
+
 		char **parsedUserInput= malloc((MAX_ARGS) * sizeof(char*));
 		if(parsedUserInput == NULL){
 			printf("USER INPUT MALLOC ERROR\n");
@@ -186,18 +182,21 @@ int main(){
 		fflush(stdout);
 
 		GetInputString(userInputStr);
+
 		int numInputs = GetArgs(parsedUserInput, userInputStr);
-		printf("num inputs was: %d\n", numInputs);
+
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
-		printf("command was: %s\n", command);
+
 		for(int i = 0; i < numInputs; i++){
 			free(parsedUserInput[i]);
 			parsedUserInput[i] = NULL;
 		}
+
 		free(parsedUserInput);
 		parsedUserInput= NULL;
-	}while(strcmp(command, "exit") != 0);
+
+	}while(StringMatch(command, "exit") == FALSE);
 	//}while(IsExit(userInput) == FALSE);
 		
 			
