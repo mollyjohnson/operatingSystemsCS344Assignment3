@@ -108,7 +108,6 @@ char *GetPID(){
 	
 	//get parent process pid int
 	int pid = getpid();	
-	printf("the RAW pid is: %d\n", pid);
 
 	//convert int pid into string pid
 	int length = snprintf(NULL, 0, "%d", pid);
@@ -196,7 +195,7 @@ SYNOPSIS
 DESCRIPTION
 
 */
-void CommandOrFileExpand(char *commandOrFile){
+void FileExpand(char *fileNameIn){
 	char *str;
 	char *orig;
 	char *rep;
@@ -205,13 +204,13 @@ void CommandOrFileExpand(char *commandOrFile){
 	rep = (char*)malloc((MAX_CHARS) * sizeof(char));
 
 	char *pid = GetPID();
-	strcpy(str, commandOrFile);
+	strcpy(str, fileNameIn);
 	strcpy(orig, "$$");
 	strcpy(rep, pid);
 
 	char *newStr = ReplaceString(str, orig, rep);
 
-	strcpy(commandOrFile, newStr);
+	strcpy(fileNameIn, newStr);
 
 	free(str);
 	str = NULL;
@@ -275,12 +274,12 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 			else{
 				if(isInFile == TRUE){
 					strcpy(inputFileIn, token);
-					CommandOrFileExpand(inputFileIn);
+					FileExpand(inputFileIn);
 					isInFile = FALSE;
 				}
 				else if(isOutFile == TRUE){
 					strcpy(outputFileIn, token);
-					CommandOrFileExpand(outputFileIn);
+					FileExpand(outputFileIn);
 					isOutFile = FALSE;
 				}
 				else{
