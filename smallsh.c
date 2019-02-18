@@ -77,8 +77,7 @@ void GetInputString(char *userInputString){
 	buffer = (char *)malloc(bufsize * sizeof(char));
 	if(buffer == NULL){
 		printf("GETLINE BUFFER ERROR, UNABLE TO ALLOCATE\n");
-		fflush(stdout);
-		exit(1);
+		fflush(stdout); exit(1);
 	}
 	while(1){
 		characters = getline(&buffer, &bufsize, stdin);
@@ -131,8 +130,7 @@ int GetArgs(char **parsedInput, char *userInputString){
 
 	if(parsedInput[inputCount] == NULL){
 		printf("USER INPUT MALLOC ERROR\n");
-		fflush(stdout);
-		exit(1);
+		fflush(stdout); exit(1);
 	}
 
 	strcpy(parsedInput[inputCount], token);
@@ -196,7 +194,7 @@ int main(){
 		free(parsedUserInput);
 		parsedUserInput= NULL;
 
-	}while(StringMatch(command, "exit") == FALSE);
+	}while(StringMatch(command, EXIT) == FALSE);
 	//}while(IsExit(userInput) == FALSE);
 		
 			
