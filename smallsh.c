@@ -68,7 +68,10 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 int IsBlank(char *userInputIn);
 int IsComment(char *userInputIn);
 int IsNewline(char *userInputIn);
-
+int IsExit(char *userInputIn);
+int IsStatus(char *userInputIn);
+int IsChangeDir(char *userInputIn);
+int IsNoAction(char *userInputIn);
 /*
 NAME
 
@@ -394,6 +397,14 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 	return inputCount;
 }
 
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
 int IsExit(char *userInputIn){
 	if(StringMatch(userInputIn, EXIT) == TRUE){
 		return TRUE;
@@ -401,6 +412,14 @@ int IsExit(char *userInputIn){
 	return FALSE;
 }
 
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
 int IsStatus(char *userInputIn){
 	if(StringMatch(userInputIn, STATUS) == TRUE){
 		return TRUE;
@@ -408,8 +427,31 @@ int IsStatus(char *userInputIn){
 	return FALSE;
 }
 
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
 int IsChangeDir(char *userInputIn){
 	if(StringMatch(userInputIn, CD) == TRUE){
+		return TRUE;
+	}
+	return FALSE;
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+int IsNoAction(char *userInputIn){
+	if(StringMatch(userInputIn, NO_ACTION) == TRUE){
 		return TRUE;
 	}
 	return FALSE;
@@ -464,6 +506,9 @@ int main(){
 			else if(numInputs > 1){
 				printf("user entered change dir w >= 1 arg\n");
 			}
+		}
+		else if(IsNoAction(parsedUserInput[0]) == TRUE){
+			printf("no action should be taken\n");
 		}
 		else{
 			printf("user entered a non-built in\n");
