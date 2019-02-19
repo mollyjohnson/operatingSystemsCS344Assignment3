@@ -73,6 +73,7 @@ int IsStatus(char *userInputIn);
 int IsChangeDir(char *userInputIn);
 int IsNoAction(char *userInputIn);
 void ChangeDirBuiltInNoArgs();
+void ChangeDirBuiltInOneArg(char *directoryArg);
 
 /*
 NAME
@@ -85,6 +86,29 @@ DESCRIPTION
 void ChangeDirBuiltInNoArgs(){
 	char *homeDir = getenv("HOME");
 	chdir(homeDir);
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void ChangeDirBuiltInOneArg(char *directoryArg){
+	if(chdir(directoryArg) != 0){
+		printf("chdir() to your specified directory has failed, no such directory here\n");
+		fflush(stdout);
+	}
+	else{
+		FILE *outputFile;
+		outputFile = fopen ("chdirectwarg.txt", "w+");
+		fprintf(outputFile, "this is the file you wrote in the changedir specified function\n");
+		fclose(outputFile);
+	}
+	
+	
 }
 
 /*
@@ -521,6 +545,8 @@ int main(){
 			}
 			else if(numInputs > 1){
 				printf("user entered change dir w >= 1 arg\n");
+				printf("cd arg is: %s\n", parsedUserInput[1]);
+				ChangeDirBuiltInOneArg(parsedUserInput[1]);
 			}
 		}
 		else if(IsNoAction(parsedUserInput[0]) == TRUE){
