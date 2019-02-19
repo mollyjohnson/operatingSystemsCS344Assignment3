@@ -458,7 +458,12 @@ int main(){
 			printf("user entered status\n");
 		}
 		else if(IsChangeDir(parsedUserInput[0]) == TRUE){
-			printf("user entered change dir\n");
+			if(numInputs == 1){
+				printf("user entered change dir w no args\n");
+			}
+			else if(numInputs > 1){
+				printf("user entered change dir w >= 1 arg\n");
+			}
 		}
 		else{
 			printf("user entered a non-built in\n");
