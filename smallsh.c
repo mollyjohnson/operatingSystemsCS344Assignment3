@@ -394,6 +394,27 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 	return inputCount;
 }
 
+int IsExit(char *userInputIn){
+	if(StringMatch(userInputIn, EXIT) == TRUE){
+		return TRUE;
+	}
+	return FALSE;
+}
+
+int IsStatus(char *userInputIn){
+	if(StringMatch(userInputIn, STATUS) == TRUE){
+		return TRUE;
+	}
+	return FALSE;
+}
+
+int IsChangeDir(char *userInputIn){
+	if(StringMatch(userInputIn, CD) == TRUE){
+		return TRUE;
+	}
+	return FALSE;
+}
+
 /*
 NAME
 
@@ -429,6 +450,20 @@ int main(){
 
 		int numInputs = GetArgs(parsedUserInput, userInputStr, inputFile, outputFile, &isBackground);
 
+		
+		if(IsExit(parsedUserInput[0]) == TRUE){
+			printf("user entered exit\n");
+		}
+		else if(IsStatus(parsedUserInput[0]) == TRUE){
+			printf("user entered status\n");
+		}
+		else if(IsChangeDir(parsedUserInput[0]) == TRUE){
+			printf("user entered change dir\n");
+		}
+		else{
+			printf("user entered a non-built in\n");
+		}
+
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
 
@@ -440,6 +475,8 @@ int main(){
 		printf("output file %s\n", outputFile);
 		printf("background status is: %d\n", isBackground);
 
+
+
 		for(int i = 0; i < numInputs; i++){
 			free(parsedUserInput[i]);
 			parsedUserInput[i] = NULL;
@@ -448,8 +485,7 @@ int main(){
 		free(parsedUserInput);
 		parsedUserInput= NULL;
 
-	}while(StringMatch(command, EXIT) == FALSE);
-	//}while(IsExit(userInput) == FALSE);
+	}while(IsExit(command) == FALSE);
 		
 			
 	return 0;
