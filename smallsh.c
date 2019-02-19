@@ -65,6 +65,62 @@ char *GetPID();
 char *ReplaceString(char *str, char *orig, char *rep);
 void VariableExpand(char *varIn);
 int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *outputFileIn, int *isBackgroundBool);
+int IsBlank(char *userInputIn);
+int IsComment(char *userInputIn);
+int IsNewline(char *userInputIn);
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+int IsBlank(char *userInputIn){
+	int spaceCount = 0;
+
+	for(int j = 0; j < strlen(userInputIn); j++){
+		if(userInputIn[j] == ' '){
+			spaceCount++;
+		}
+	}
+
+	if(spaceCount == (strlen(userInputIn) - 1)){
+		return TRUE;
+	}
+	return FALSE;
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+int IsComment(char *userInputIn){
+	if(userInputIn[0] == '#'){
+		return TRUE;
+	}
+	return FALSE;
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+int IsNewline(char *userInputIn){
+	if(StringMatch(userInputIn, "\n") == TRUE){
+		return TRUE;
+	}
+	return FALSE;
+}
 
 /*
 NAME
@@ -76,9 +132,6 @@ DESCRIPTION
 */
 void GetInputString(char *userInputString){
 	//getline use adapted from my own work in OSU CS 344 Winter 2019 Assignment 2
-	int isSpace = FALSE;
-	int spaceCount = 0;
-	int isComment = FALSE;
 	char *buffer;
 	size_t bufsize = MAX_CHARS;
 	size_t characters;
@@ -97,23 +150,7 @@ void GetInputString(char *userInputString){
 		}
 	}
 
-	if(buffer[0] == '#'){
-		isComment = TRUE;
-	}
-
-	int strlenBuffer = strlen(buffer);
-	printf("strlen of buffer is: %d\n", strlenBuffer);
-	for(int j = 0; j < strlen(buffer); j++){
-		if(buffer[j] == ' '){
-			spaceCount++;
-		}
-	}
-	printf("space count is: %d\n", spaceCount);
-	if(spaceCount == (strlen(buffer) - 1)){
-		isSpace = TRUE;
-	}
-
-	if((StringMatch(buffer, "\n") == FALSE) && (isSpace == FALSE) && (isComment == FALSE)){
+	if((IsBlank(buffer) == FALSE) && (IsComment(buffer) == FALSE) && (IsNewline(buffer) == FALSE)){
 		buffer[strcspn(buffer, "\n")] = '\0';
 		strcpy(userInputString, buffer);
 	}
