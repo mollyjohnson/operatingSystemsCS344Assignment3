@@ -72,6 +72,21 @@ int IsExit(char *userInputIn);
 int IsStatus(char *userInputIn);
 int IsChangeDir(char *userInputIn);
 int IsNoAction(char *userInputIn);
+void ChangeDirBuiltInNoArgs();
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void ChangeDirBuiltInNoArgs(){
+	char *homeDir = getenv("HOME");
+	chdir(homeDir);
+}
+
 /*
 NAME
 
@@ -502,6 +517,7 @@ int main(){
 		else if(IsChangeDir(parsedUserInput[0]) == TRUE){
 			if(numInputs == 1){
 				printf("user entered change dir w no args\n");
+				ChangeDirBuiltInNoArgs();
 			}
 			else if(numInputs > 1){
 				printf("user entered change dir w >= 1 arg\n");
