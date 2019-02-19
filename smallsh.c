@@ -59,7 +59,7 @@ int exitStatusGlobal = 0;
 */
 
 //function declarations
-
+int StringMatch(char *string1, char *string2);
 
 /*
 NAME
@@ -71,6 +71,9 @@ DESCRIPTION
 */
 void GetInputString(char *userInputString){
 	//getline use adapted from my own work in OSU CS 344 Winter 2019 Assignment 2
+	int isSpace = FALSE;
+	int spaceCount = 0;
+	int isComment = FALSE;
 	char *buffer;
 	size_t bufsize = MAX_CHARS;
 	size_t characters;
@@ -88,8 +91,32 @@ void GetInputString(char *userInputString){
 			break;
 		}
 	}
-	buffer[strcspn(buffer, "\n")] = '\0';
-	strcpy(userInputString, buffer);
+
+	if(buffer[0] == '#'){
+		isComment = TRUE;
+	}
+
+	int strlenBuffer = strlen(buffer);
+	printf("strlen of buffer is: %d\n", strlenBuffer);
+	for(int j = 0; j < strlen(buffer); j++){
+		if(buffer[j] == ' '){
+			spaceCount++;
+		}
+	}
+	printf("space count is: %d\n", spaceCount);
+	if(spaceCount == (strlen(buffer) - 1)){
+		isSpace = TRUE;
+	}
+
+	if((StringMatch(buffer, "\n") == FALSE) && (isSpace == FALSE) && (isComment == FALSE)){
+		buffer[strcspn(buffer, "\n")] = '\0';
+		strcpy(userInputString, buffer);
+	}
+	else{
+		
+		strcpy(userInputString, INVALID);
+	}
+	
 	free(buffer);
 	buffer = NULL;
 }
