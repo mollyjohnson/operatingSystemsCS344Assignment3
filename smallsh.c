@@ -98,7 +98,7 @@ DESCRIPTION
 */
 void ChangeDirBuiltInOneArg(char *directoryArg){
 	if(chdir(directoryArg) != 0){
-		printf("chdir() to your specified directory has failed, no such directory here\n");
+		printf("chdir() to your specified directory has failed, no such directory there.\n");
 		fflush(stdout);
 	}
 	else{
