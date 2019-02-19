@@ -60,6 +60,11 @@ int exitStatusGlobal = 0;
 
 //function declarations
 int StringMatch(char *string1, char *string2);
+void GetInputString(char *userInputString);
+char *GetPID();
+char *ReplaceString(char *str, char *orig, char *rep);
+void VariableExpand(char *varIn);
+int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *outputFileIn, int *isBackgroundBool);
 
 /*
 NAME
