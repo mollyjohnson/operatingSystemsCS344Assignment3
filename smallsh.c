@@ -45,7 +45,7 @@ in the assignment instructions.
 #define STATUS "status"
 #define FALSE 0
 #define TRUE 1
-#define INVALID "INVALID"
+#define NO_ACTION "NO_ACTION"
 
 //global variables
 /*
@@ -114,7 +114,7 @@ void GetInputString(char *userInputString){
 	}
 	else{
 		
-		strcpy(userInputString, INVALID);
+		strcpy(userInputString, NO_ACTION);
 	}
 	
 	free(buffer);
