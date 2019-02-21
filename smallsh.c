@@ -546,6 +546,12 @@ int main(){
 		}
 		else{
 			//printf("user entered a non-built in\n");
+
+			//make the array NULL-terminated for execvp() so it knows where the end
+			//of the array is
+			parsedUserInput[numInputs] = NULL;
+
+			
 		}
 
 		memset(command, '\0', sizeof(command));
