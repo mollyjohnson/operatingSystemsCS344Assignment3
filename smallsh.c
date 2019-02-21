@@ -505,6 +505,8 @@ int main(){
 		memset(inputFile, '\0', sizeof(inputFile));
 		char outputFile[MAX_CHARS];
 		memset(outputFile, '\0', sizeof(outputFile));
+		strcpy(inputFile, NO_ACTION);
+		strcpy(outputFile, NO_ACTION);
 		int isBackground = FALSE;
 
 		char userInputStr[MAX_CHARS];
