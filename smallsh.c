@@ -48,7 +48,6 @@ in the assignment instructions.
 #define NO_ACTION "NO_ACTION"
 
 //global variables
-/*
 //flag for if background is possible (if SIGSTP command given, should ignore "&" and
 //just run it as a foreground command)
 int backgroundPossibleGlobal = TRUE;
@@ -56,7 +55,6 @@ int backgroundPossibleGlobal = TRUE;
 //exit status for the program. set to 0 to start w/ by default, can be changed if program
 //encounters errors and needs to exit w/ a non-zero status
 int exitStatusGlobal = 0;
-*/
 
 //function declarations
 int StringMatch(char *string1, char *string2);
@@ -524,42 +522,42 @@ int main(){
 		GetInputString(userInputStr);
 
 		int numInputs = GetArgs(parsedUserInput, userInputStr, inputFile, outputFile, &isBackground);
-
 		
+
 		if(IsExit(parsedUserInput[0]) == TRUE){
-			printf("user entered exit\n");
+			//printf("user entered exit\n");
 		}
 		else if(IsStatus(parsedUserInput[0]) == TRUE){
-			printf("user entered status\n");
+			//printf("user entered status\n");
 		}
 		else if(IsChangeDir(parsedUserInput[0]) == TRUE){
 			if(numInputs == 1){
-				printf("user entered change dir w no args\n");
+				//printf("user entered change dir w no args\n");
 				ChangeDirBuiltInNoArgs();
 			}
 			else if(numInputs > 1){
-				printf("user entered change dir w >= 1 arg\n");
-				printf("cd arg is: %s\n", parsedUserInput[1]);
+				//printf("user entered change dir w >= 1 arg\n");
+				//printf("cd arg is: %s\n", parsedUserInput[1]);
 				ChangeDirBuiltInOneArg(parsedUserInput[1]);
 			}
 		}
 		else if(IsNoAction(parsedUserInput[0]) == TRUE){
-			printf("no action should be taken\n");
+			//printf("no action should be taken\n");
 		}
 		else{
-			printf("user entered a non-built in\n");
+			//printf("user entered a non-built in\n");
 		}
 
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
 
-		printf("command: %s\n", parsedUserInput[0]);
-		for(int k = 1; k < numInputs; k++){
+		//printf("command: %s\n", parsedUserInput[0]);
+		/*for(int k = 1; k < numInputs; k++){
 			printf("arg %d: %s\n", k, parsedUserInput[k]);
-		}
-		printf("input file: %s\n", inputFile);
-		printf("output file %s\n", outputFile);
-		printf("background status is: %d\n", isBackground);
+		}*/
+		//printf("input file: %s\n", inputFile);
+		//printf("output file %s\n", outputFile);
+		//printf("background status is: %d\n", isBackground);
 
 
 
