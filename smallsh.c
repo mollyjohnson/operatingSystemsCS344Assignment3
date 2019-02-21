@@ -216,8 +216,7 @@ char *GetPID(){
 	char *stringPID = malloc(length + 1);
 	if(stringPID == NULL){
 		printf("ERROR, NOT ALLOCATED\n");
-		fflush(stdout);
-		exit(1);
+		fflush(stdout); exit(1);
 	}
 	snprintf(stringPID, length + 1, "%d", pid);
 	fflush(stdout);
@@ -501,10 +500,12 @@ int main(){
 	do{
 		char inputFile[MAX_CHARS];
 		memset(inputFile, '\0', sizeof(inputFile));
+		strcpy(inputFile, NO_ACTION);
+
 		char outputFile[MAX_CHARS];
 		memset(outputFile, '\0', sizeof(outputFile));
-		strcpy(inputFile, NO_ACTION);
 		strcpy(outputFile, NO_ACTION);
+
 		int isBackground = FALSE;
 
 		char userInputStr[MAX_CHARS];
@@ -525,58 +526,64 @@ int main(){
 		
 
 		if(IsExit(parsedUserInput[0]) == TRUE){
-			//printf("user entered exit\n");
+			printf("user entered exit\n"); fflush(stdout);
 		}
 		else if(IsStatus(parsedUserInput[0]) == TRUE){
-			//printf("user entered status\n");
+			printf("user entered status\n"); fflush(stdout); 
 		}
 		else if(IsChangeDir(parsedUserInput[0]) == TRUE){
 			if(numInputs == 1){
-				//printf("user entered change dir w no args\n");
+				printf("user entered change dir w no args\n"); fflush(stdout); 
 				ChangeDirBuiltInNoArgs();
 			}
 			else if(numInputs > 1){
-				//printf("user entered change dir w >= 1 arg\n");
-				//printf("cd arg is: %s\n", parsedUserInput[1]);
+				printf("user entered change dir w >= 1 arg\n"); fflush(stdout); 
+				printf("cd arg is: %s\n", parsedUserInput[1]); fflush(stdout); 
 				ChangeDirBuiltInOneArg(parsedUserInput[1]);
 			}
 		}
 		else if(IsNoAction(parsedUserInput[0]) == TRUE){
-			//printf("no action should be taken\n");
+			printf("no action should be taken\n"); fflush(stdout); 
 		}
 		else{
-			//printf("user entered a non-built in\n");
+			printf("user entered a non-built in\n"); fflush(stdout); 
 
 			//make the array NULL-terminated for execvp() so it knows where the end
 			//of the array is
 			parsedUserInput[numInputs] = NULL;
 
-			
+			//if user indicated to run the process in the background AND background
+			//mode is currently allowed
+			if((isBackground == TRUE) && (backgroundPossibleGlobal == TRUE)){
+				printf("user wants background mode & it's allowed\n"); fflush(stdout);
+			}
+			//if the user didn't indicate to run the process in the background or if
+			//they did want to run the process in the background but background mode
+			//isn't currently allowed
+			else{
+				printf("user wants foreground mode (or background and it's not allowed)\n"); fflush(stdout);
+			}
 		}
 
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
 
-		//printf("command: %s\n", parsedUserInput[0]);
-		/*for(int k = 1; k < numInputs; k++){
-			printf("arg %d: %s\n", k, parsedUserInput[k]);
-		}*/
-		//printf("input file: %s\n", inputFile);
-		//printf("output file %s\n", outputFile);
-		//printf("background status is: %d\n", isBackground);
-
-
+		printf("command: %s\n", parsedUserInput[0]); fflush(stdout); 
+		for(int k = 1; k < numInputs; k++){
+			printf("arg %d: %s\n", k, parsedUserInput[k]); fflush(stdout); 
+		}
+		printf("input file: %s\n", inputFile); fflush(stdout); 
+		printf("output file %s\n", outputFile); fflush(stdout); 
+		printf("background status is: %d\n", isBackground); fflush(stdout); 
 
 		for(int i = 0; i < numInputs; i++){
 			free(parsedUserInput[i]);
 			parsedUserInput[i] = NULL;
 		}
-
 		free(parsedUserInput);
 		parsedUserInput= NULL;
 
 	}while(IsExit(command) == FALSE);
 		
-			
 	return 0;
 }
