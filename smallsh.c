@@ -101,14 +101,6 @@ void ChangeDirBuiltInOneArg(char *directoryArg){
 		printf("chdir() to your specified directory has failed, no such directory there.\n");
 		fflush(stdout);
 	}
-	else{
-		FILE *outputFile;
-		outputFile = fopen ("chdirectwarg.txt", "w+");
-		fprintf(outputFile, "this is the file you wrote in the changedir specified function\n");
-		fclose(outputFile);
-	}
-	
-	
 }
 
 /*
