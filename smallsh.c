@@ -8,8 +8,8 @@ lectures and assignment instructions/hints unless otherwise specifically indicat
 Note: Also adapted from my own work from 11/14/18 (took the class in the Fall 2018 term but
 am retaking this term for a better grade).
 
-fflush(stdout) used after every printf() in this assignment at the advice of the instructor
-in the assignment instructions.
+note: fflush(stdout) used after every printf() in this assignment at the advice of the instructor
+in the assignment instructions to make sure the output buffers get flushed every time I try to print.
 */
 
 //added #define _GNU_SOURCE before #include <stdio.h> to prevent "implicit function declaration" 
@@ -34,10 +34,11 @@ in the assignment instructions.
 #include <errno.h>
 
 //constant macro definitions
+
 //max values for chars and args were determined by the CS344 assignment3 instructions
 //(max chars is actually 2048 but i added one additional char for the null terminator).
 //(max args is actually 2048 but i added one additional arg for the NULL arg req'd to null-terminate
-//an array sent to execvp() so execvp() knows when the end of the array has been reached).
+//an array sent to execvp() so execvp() knows when the end of the array has been reached)
 #define MAX_CHARS 2049
 #define MAX_ARGS 513
 #define EXIT "exit"
@@ -48,10 +49,10 @@ in the assignment instructions.
 #define NO_ACTION "NO_ACTION"
 
 //global variables
+
 //flag for if background is possible (if SIGSTP command given, should ignore "&" and
 //just run it as a foreground command)
 int backgroundPossibleGlobal = TRUE;
-
 
 //function declarations
 int StringMatch(char *string1, char *string2);
@@ -71,7 +72,6 @@ void ChangeDirBuiltInNoArgs();
 void ChangeDirBuiltInOneArg(char *directoryArg);
 void Execute(char **parsedInput);
 void StatusBuiltIn(int childExitStatusIn);
-
 
 /*
 NAME
@@ -98,10 +98,8 @@ void StatusBuiltIn(int childExitStatusIn){
 	}
 	else{
 		printf("neither WIFEXITED or WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
-		fflush(stdout);
-		exit(1);
+		fflush(stdout); exit(1); 
 	}
-
 }
 
 /*
@@ -540,9 +538,10 @@ DESCRIPTION
 
 */
 int main(){
-	//exit status for the program. set to 0 to start w/ by default, can be changed if program
-	//encounters errors and needs to exit w/ a non-zero status
-	int exitStatus = 0;
+	//exit status for the foreground processes. set to 0 to start w/ by default (so if user calls
+	//status before any foreground processes have been run it's zero). can be changed if a foreground
+	//process encounters errors and needs to exit w/ a non-zero status
+	int childExitStatus = 0;
 	int foregroundProcessCount = 0;
 	int backgroundProcessCount = 0;
 	int forkCount = 0;
@@ -588,6 +587,7 @@ int main(){
 		}
 		else if(IsStatus(parsedUserInput[0]) == TRUE){
 			printf("user entered status\n"); fflush(stdout); 
+			StatusBuiltIn(childExitStatus);
 		}
 		else if(IsChangeDir(parsedUserInput[0]) == TRUE){
 			if(numInputs == 1){
@@ -623,9 +623,8 @@ int main(){
 				printf("user wants foreground mode (or background and it's not allowed)\n"); fflush(stdout);
 				
 				pid_t spawnpid = -5;
-				int childExitStatus = -5;
 
-				if(forkCount < 100){
+				if(forkCount < 50){
 					spawnpid = fork();
 					switch(spawnpid){
 						case -1:
@@ -647,7 +646,7 @@ int main(){
 							printf("parent (%d): waiting for child(%d) to terminate\n", getpid(), spawnpid); fflush(stdout);
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
 							printf("parent (%d): child(%d) terminated, exiting!\n", getpid(), actualPID); fflush(stdout);
-
+							StatusBuiltIn(childExitStatus);
 							break;
 					}
 				}
