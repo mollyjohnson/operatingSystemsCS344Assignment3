@@ -70,7 +70,7 @@ int IsNoAction(char *userInputIn);
 void ChangeDirBuiltInNoArgs();
 void ChangeDirBuiltInOneArg(char *directoryArg);
 void Execute(char **parsedInput);
-void StatusBuiltIn();
+void StatusBuiltIn(int childExitStatusIn);
 
 
 /*
@@ -81,8 +81,27 @@ SYNOPSIS
 DESCRIPTION
 
 */
-void StatusBuiltIn(){
-	
+void StatusBuiltIn(int childExitStatusIn){
+	if(WIFEXITED(childExitStatusIn) != 0){
+		printf("the process exited normally\n");
+		fflush(stdout);
+		int exitStatus = WEXITSTATUS(childExitStatusIn);
+		printf("the exit status of the last foreground process was: %d\n", exitStatus);
+		fflush(stdout);
+	}
+	else if(WIFSIGNALED(childExitStatusIn) != 0){
+		printf("the process was terminated by a signal\n");
+		fflush(stdout);
+		int termSignal = WTERMSIG(childExitStatusIn);
+		printf("the terminating signal of the last foreground process was: %d\n", termSignal);
+		fflush(stdout);
+	}
+	else{
+		printf("neither WIFEXITED or WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
+		fflush(stdout);
+		exit(1);
+	}
+
 }
 
 /*
