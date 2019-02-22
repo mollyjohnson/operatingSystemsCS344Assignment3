@@ -497,6 +497,7 @@ int main(){
 	
 	//get user input as long as the user hasn't entered "exit"
 	char command[MAX_CHARS];
+	int forkCount = 0;
 	do{
 		char inputFile[MAX_CHARS];
 		memset(inputFile, '\0', sizeof(inputFile));
@@ -562,6 +563,31 @@ int main(){
 			//isn't currently allowed
 			else{
 				printf("user wants foreground mode (or background and it's not allowed)\n"); fflush(stdout);
+				
+				pid_t spawnpid = -5;
+				int childExitMethod = -5;
+
+				if(forkCount < 50){
+					spawnpid = fork();
+					switch(spawnpid){
+						case -1:
+							perror("Hull Breach!"); exit(1); //error, no child process created
+							break;
+						case 0: //i am the child
+							printf("i am the child!\n");
+							//exit(0);
+							break;
+						default: //i am the parent
+							printf("i am the parent!\n");
+							break;
+					}
+					printf("PARNENT: PID: %d, waiting...\n", spawnpid);
+					waitpid(spawnpid, &childExitMethod, 0);
+					printf("PARENT: child process terminated, exiting!\n");
+				}
+				else{ //fork bombed
+					perror("FORK BOMB!"); exit(1);  
+				}
 			}
 		}
 
