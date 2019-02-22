@@ -76,6 +76,38 @@ void ExitBuiltIn();
 void RedirectInputFile(char *inputFileIn);
 void RedirectOutputFile(char *outputFileIn);
 void RedirectDevNull();
+int NeedsOutputRedirect(char *outputFileIn);
+int NeedsInputRedirect(char *inputFileIn);
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+int NeedsInputRedirect(char *inputFileIn){
+	if(StringMatch(inputFileIn, NO_ACTION) == TRUE){
+		return FALSE; 
+	}
+	return TRUE;
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+int NeedsOutputRedirect(char *outputFileIn){
+	if(StringMatch(outputFileIn, NO_ACTION) == TRUE){
+		return FALSE;
+	}
+	return TRUE;
+}
 
 /*
 NAME
@@ -685,7 +717,7 @@ int main(){
 							printf("child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
 							sleep(1);
 							printf("child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
-							if(StringMatch(inputFile, NO_ACTION) == FALSE){
+							if(NeedsInputRedirect(inputFile) == TRUE){
 								printf("foreground input file is gonna be redirected!\n");fflush(stdout);
 								sourceFD = open(inputFile, O_RDONLY);
 								if(sourceFD == -1){
@@ -697,7 +729,7 @@ int main(){
 									perror("source dup2() error\n"); exit(1);
 								}
 							}
-							if(StringMatch(outputFile, NO_ACTION) == FALSE){
+							if(NeedsOutputRedirect(outputFile) == TRUE){
 								printf("foreground output file is gonna be redirected!\n"); fflush(stdout);
 								targetFD = open(outputFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 								if(targetFD == -1){
