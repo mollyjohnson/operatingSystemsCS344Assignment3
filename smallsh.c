@@ -527,7 +527,12 @@ int main(){
 	int foregroundProcessCount = 0;
 	int backgroundProcessCount = 0;
 	int forkCount = 0;
-
+	int *backgroundPidArray = malloc(MAX_ARGS * sizeof(int));
+	int *foregroundPidArray = malloc(MAX_CHARS * sizeof(int));
+	if((backgroundPidArray == NULL) || (foregroundPidArray == NULL)){
+		printf("foreground and/or background PID arrays malloc error\n");
+		fflush(stdout); exit(1);
+	}
 
 	//get user input as long as the user hasn't entered "exit"
 	char command[MAX_CHARS];
@@ -648,6 +653,11 @@ int main(){
 			free(parsedUserInput[i]);
 			parsedUserInput[i] = NULL;
 		}
+		free(backgroundPidArray);
+		backgroundPidArray = NULL;
+		free(foregroundPidArray);
+		foregroundPidArray = NULL;
+
 		free(parsedUserInput);
 		parsedUserInput= NULL;
 
