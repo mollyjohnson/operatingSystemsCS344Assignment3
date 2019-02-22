@@ -52,9 +52,6 @@ in the assignment instructions.
 //just run it as a foreground command)
 int backgroundPossibleGlobal = TRUE;
 
-//exit status for the program. set to 0 to start w/ by default, can be changed if program
-//encounters errors and needs to exit w/ a non-zero status
-int exitStatusGlobal = 0;
 
 //function declarations
 int StringMatch(char *string1, char *string2);
@@ -73,6 +70,20 @@ int IsNoAction(char *userInputIn);
 void ChangeDirBuiltInNoArgs();
 void ChangeDirBuiltInOneArg(char *directoryArg);
 void Execute(char **parsedInput);
+void StatusBuiltIn();
+
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void StatusBuiltIn(){
+	
+}
 
 /*
 NAME
@@ -510,10 +521,16 @@ DESCRIPTION
 
 */
 int main(){
-	
+	//exit status for the program. set to 0 to start w/ by default, can be changed if program
+	//encounters errors and needs to exit w/ a non-zero status
+	int exitStatus = 0;
+	int foregroundProcessCount = 0;
+	int backgroundProcessCount = 0;
+	int forkCount = 0;
+
+
 	//get user input as long as the user hasn't entered "exit"
 	char command[MAX_CHARS];
-	int forkCount = 0;
 	do{
 		char inputFile[MAX_CHARS];
 		memset(inputFile, '\0', sizeof(inputFile));
@@ -573,6 +590,7 @@ int main(){
 			//mode is currently allowed
 			if((isBackground == TRUE) && (backgroundPossibleGlobal == TRUE)){
 				printf("user wants background mode & it's allowed\n"); fflush(stdout);
+
 			}
 			//if the user didn't indicate to run the process in the background or if
 			//they did want to run the process in the background but background mode
@@ -605,11 +623,12 @@ int main(){
 							printf("parent (%d): waiting for child(%d) to terminate\n", getpid(), spawnpid); fflush(stdout);
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
 							printf("parent (%d): child(%d) terminated, exiting!\n", getpid(), actualPID); fflush(stdout);
+
 							break;
 					}
 				}
 				else{ //fork bombed
-					perror("FORK BOMB!"); exit(1);  
+					perror("FORK BOMB! EXITING!"); exit(1);  
 				}
 			}
 		}
