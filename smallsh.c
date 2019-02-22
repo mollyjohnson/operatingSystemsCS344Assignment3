@@ -73,6 +73,45 @@ void ChangeDirBuiltInOneArg(char *directoryArg);
 void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
 void ExitBuiltIn();
+void RedirectInputFile(char *inputFileIn);
+void RedirectOutputFile(char *outputFileIn);
+void RedirectDevNull();
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void RedirectDevNull(){
+		
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void RedirectOutputFile(char *outputFileIn){
+
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void RedirectInputFile(char *inputFileIn){
+
+}
 
 /*
 NAME
@@ -645,6 +684,14 @@ int main(){
 							printf("child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
 							sleep(1);
 							printf("child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
+							if(StringMatch(inputFile, NO_ACTION) == FALSE){
+								printf("foreground input file is gonna be redirected!\n");fflush(stdout);
+								RedirectInputFile(inputFile);
+							}
+							if(StringMatch(outputFile, NO_ACTION) == FALSE){
+								printf("foreground output file is gonna be redirected!\n"); fflush(stdout);
+								RedirectOutputFile(outputFile);
+							}
 							Execute(parsedUserInput, &childExitStatus);
 							break;
 						default: //i am the parent
