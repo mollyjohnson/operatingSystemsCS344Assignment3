@@ -73,9 +73,9 @@ void ChangeDirBuiltInOneArg(char *directoryArg);
 void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
 void ExitBuiltIn();
-void RedirectInputFile(char *inputFileIn);
-void RedirectOutputFile(char *outputFileIn);
-void RedirectDevNull();
+//void RedirectInputFile(char *inputFileIn, int *sourceFDIn);
+//void RedirectOutputFile(char *outputFileIn, int *targetFDIn);
+//void RedirectDevNull();
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 
@@ -107,42 +107,6 @@ int NeedsOutputRedirect(char *outputFileIn){
 		return FALSE;
 	}
 	return TRUE;
-}
-
-/*
-NAME
-
-SYNOPSIS
-
-DESCRIPTION
-
-*/
-void RedirectDevNull(){
-		
-}
-
-/*
-NAME
-
-SYNOPSIS
-
-DESCRIPTION
-
-*/
-void RedirectOutputFile(char *outputFileIn){
-
-}
-
-/*
-NAME
-
-SYNOPSIS
-
-DESCRIPTION
-
-*/
-void RedirectInputFile(char *inputFileIn){
-
 }
 
 /*
