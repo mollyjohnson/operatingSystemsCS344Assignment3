@@ -70,7 +70,7 @@ int IsChangeDir(char *userInputIn);
 int IsNoAction(char *userInputIn);
 void ChangeDirBuiltInNoArgs();
 void ChangeDirBuiltInOneArg(char *directoryArg);
-void Execute(char **parsedInput);
+void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
 
 /*
@@ -110,10 +110,12 @@ SYNOPSIS
 DESCRIPTION
 
 */
-void Execute(char **parsedInput){
+void Execute(char **parsedInput, int *childExitStatusIn){
 	if(execvp(parsedInput[0], parsedInput) < 0){
-		perror("execvp() failure! command could not be executed.\n");
-		exit(1);
+		perror("Failure with execvp()! Command could not be executed. Exit status will be set to 1.\n");
+		*childExitStatusIn = 1;
+		printf("child exit exec error status is: %d\n", *childExitStatusIn);
+		exit(*childExitStatusIn);
 	}
 }
 
@@ -636,7 +638,7 @@ int main(){
 							sleep(1);
 							printf("child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
 
-							Execute(parsedUserInput);
+							Execute(parsedUserInput, &childExitStatus);
 
 							break;
 						default: //i am the parent
@@ -646,7 +648,6 @@ int main(){
 							printf("parent (%d): waiting for child(%d) to terminate\n", getpid(), spawnpid); fflush(stdout);
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
 							printf("parent (%d): child(%d) terminated, exiting!\n", getpid(), actualPID); fflush(stdout);
-							StatusBuiltIn(childExitStatus);
 							break;
 					}
 				}
