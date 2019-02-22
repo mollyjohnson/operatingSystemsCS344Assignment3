@@ -72,6 +72,19 @@ void ChangeDirBuiltInNoArgs();
 void ChangeDirBuiltInOneArg(char *directoryArg);
 void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
+void ExitBuiltIn();
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void ExitBuiltIn(){
+	
+}
 
 /*
 NAME
@@ -547,12 +560,8 @@ int main(){
 	int foregroundProcessCount = 0;
 	int backgroundProcessCount = 0;
 	int forkCount = 0;
-	int *backgroundPidArray = malloc(MAX_ARGS * sizeof(int));
-	int *foregroundPidArray = malloc(MAX_CHARS * sizeof(int));
-	if((backgroundPidArray == NULL) || (foregroundPidArray == NULL)){
-		printf("foreground and/or background PID arrays malloc error\n");
-		fflush(stdout); exit(1);
-	}
+	int backgroundPidArray[1000];
+	int foregroundPidArray[1000];
 
 	//get user input as long as the user hasn't entered "exit"
 	char command[MAX_CHARS];
@@ -582,7 +591,6 @@ int main(){
 		GetInputString(userInputStr);
 
 		int numInputs = GetArgs(parsedUserInput, userInputStr, inputFile, outputFile, &isBackground);
-		
 
 		if(IsExit(parsedUserInput[0]) == TRUE){
 			printf("user entered exit\n"); fflush(stdout);
@@ -637,15 +645,15 @@ int main(){
 							printf("child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
 							sleep(1);
 							printf("child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
-
 							Execute(parsedUserInput, &childExitStatus);
-
 							break;
 						default: //i am the parent
 							printf("i am the parent!\n"); fflush(stdout);
 							printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
 							sleep(2);
 							printf("parent (%d): waiting for child(%d) to terminate\n", getpid(), spawnpid); fflush(stdout);
+							foregroundPidArray[foregroundProcessCount] = spawnpid;
+							foregroundProcessCount++;
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
 							printf("parent (%d): child(%d) terminated, exiting!\n", getpid(), actualPID); fflush(stdout);
 							break;
@@ -656,6 +664,23 @@ int main(){
 				}
 			}
 		}
+
+		printf("num foreground processes run: %d\n", foregroundProcessCount); fflush(stdout);
+		printf("num background processes run: %d\n", backgroundProcessCount); fflush(stdout);
+
+		if(foregroundProcessCount > 0){
+			for(int k = 0; k < foregroundProcessCount; k++){
+				printf("foreground process %d pid: %d\n", k + 1, foregroundPidArray[k]);
+				fflush(stdout);
+			}
+		}
+		if(backgroundProcessCount > 0){
+			for(int m = 0; m < foregroundProcessCount; m++){
+				printf("background process %d pid: %d\n", m + 1, backgroundPidArray[m]);
+				fflush(stdout);
+			}
+		}
+
 
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
@@ -672,11 +697,6 @@ int main(){
 			free(parsedUserInput[i]);
 			parsedUserInput[i] = NULL;
 		}
-		free(backgroundPidArray);
-		backgroundPidArray = NULL;
-		free(foregroundPidArray);
-		foregroundPidArray = NULL;
-
 		free(parsedUserInput);
 		parsedUserInput= NULL;
 
