@@ -72,6 +72,22 @@ int IsChangeDir(char *userInputIn);
 int IsNoAction(char *userInputIn);
 void ChangeDirBuiltInNoArgs();
 void ChangeDirBuiltInOneArg(char *directoryArg);
+void Execute(char **parsedInput);
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void Execute(char **parsedInput){
+	if(execvp(parsedInput[0], parsedInput) < 0){
+		perror("execvp() failure! command could not be executed.\n");
+		exit(1);
+	}
+}
 
 /*
 NAME
@@ -567,7 +583,7 @@ int main(){
 				pid_t spawnpid = -5;
 				int childExitStatus = -5;
 
-				if(forkCount < 50){
+				if(forkCount < 100){
 					spawnpid = fork();
 					switch(spawnpid){
 						case -1:
@@ -578,9 +594,9 @@ int main(){
 							printf("child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
 							sleep(1);
 							printf("child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
-							if(execvp(parsedUserInput[0], parsedUserInput) < 0){
-								perror("error in execvp()"); exit(2);
-							}
+
+							Execute(parsedUserInput);
+
 							break;
 						default: //i am the parent
 							printf("i am the parent!\n"); fflush(stdout);
