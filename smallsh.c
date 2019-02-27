@@ -72,11 +72,35 @@ void ChangeDirBuiltInOneArg(char *directoryArg);
 void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
 void ExitBuiltIn();
-//void RedirectInputFile(char *inputFileIn, int *sourceFDIn);
+int RedirectInputFile(char *inputFileIn);
 int RedirectOutputFile(char *outputFileIn);
 //void RedirectDevNull();
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+int RedirectInputFile(char *inputFileIn){
+	int childExitStat = 0;
+	int sourceFD = open(inputFileIn, O_RDONLY);
+	if(sourceFD == -1){
+		printf("source open() error\n"); fflush(stdout);
+		childExitStat = 1;
+	}
+	printf("sourceFD = %d\n", sourceFD);
+	int dupResult = dup2(sourceFD, 0);
+	if(dupResult == -1){
+		printf("source dup2() error\n"); fflush(stdout);
+		childExitStat = 1;
+	}
+	return childExitStat;
+}
 
 /*
 NAME
@@ -627,7 +651,6 @@ int main(){
 	//get user input as long as the user hasn't entered "exit"
 	char command[MAX_CHARS];
 	do{
-		int sourceFD, result;
 		char inputFile[MAX_CHARS];
 		memset(inputFile, '\0', sizeof(inputFile));
 		strcpy(inputFile, NO_ACTION);
@@ -709,15 +732,10 @@ int main(){
 							printf("child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
 							if(NeedsInputRedirect(inputFile) == TRUE){
 								printf("foreground input file is gonna be redirected!\n");fflush(stdout);
-								sourceFD = open(inputFile, O_RDONLY);
-								if(sourceFD == -1){
-									perror("source open() error\n"); childExitStatus = 1;
+								if(RedirectInputFile(inputFile) == 1){
+									childExitStatus = 1;
 								}
-								printf("sourceFD = %d\n", sourceFD);
-								result = dup2(sourceFD, 0);
-								if(result == -1){
-									perror("source dup2() error\n"); childExitStatus = 1;
-								}
+								
 							}
 							if(NeedsOutputRedirect(outputFile) == TRUE){
 								printf("foreground output file is gonna be redirected!\n"); fflush(stdout);
