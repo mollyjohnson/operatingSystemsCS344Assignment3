@@ -41,6 +41,7 @@ in the assignment instructions to make sure the output buffers get flushed every
 //an array sent to execvp() so execvp() knows when the end of the array has been reached)
 #define MAX_CHARS 2049
 #define MAX_ARGS 513
+#define MAX_FORKS 100
 #define EXIT "exit"
 #define CD "cd"
 #define STATUS "status"
@@ -670,7 +671,7 @@ int main(){
 				
 				pid_t spawnpid = -5;
 
-				if(forkCount < 50){
+				if(forkCount < MAX_FORKS){
 					spawnpid = fork();
 					switch(spawnpid){
 						case -1:
