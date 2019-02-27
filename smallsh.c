@@ -73,7 +73,7 @@ void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
 void ExitBuiltIn();
 //void RedirectInputFile(char *inputFileIn, int *sourceFDIn);
-int RedirectOutputFile(char *outputFileIn, int *targetFDIn);
+int RedirectOutputFile(char *outputFileIn);
 //void RedirectDevNull();
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
@@ -86,17 +86,15 @@ SYNOPSIS
 DESCRIPTION
 
 */
-int RedirectOutputFile(char *outputFileIn, int *targetFDIn){
+int RedirectOutputFile(char *outputFileIn){
 	int childExitStat = 0;
-	int dupResult;
-	*targetFDIn = open(outputFileIn, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if(*targetFDIn == -1){
+	int targetFD = open(outputFileIn, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if(targetFD == -1){
 		printf("target open() error\n"); fflush(stdout);
 		childExitStat = 1;
 	}
-	printf("targetFD = %d\n", *targetFDIn);
-	int target = (*targetFDIn);
-	dupResult = dup2(target, 1);
+	printf("targetFD = %d\n", targetFD);
+	int dupResult = dup2(targetFD, 1);
 	if(dupResult == -1){
 		printf("target dup2() error\n"); fflush(stdout);
 		childExitStat = 1;
@@ -629,7 +627,7 @@ int main(){
 	//get user input as long as the user hasn't entered "exit"
 	char command[MAX_CHARS];
 	do{
-		int sourceFD, targetFD, result;
+		int sourceFD, result;
 		char inputFile[MAX_CHARS];
 		memset(inputFile, '\0', sizeof(inputFile));
 		strcpy(inputFile, NO_ACTION);
@@ -723,7 +721,9 @@ int main(){
 							}
 							if(NeedsOutputRedirect(outputFile) == TRUE){
 								printf("foreground output file is gonna be redirected!\n"); fflush(stdout);
-								childExitStatus = RedirectOutputFile(outputFile, &targetFD);								
+								if(RedirectOutputFile(outputFile) == 1){
+									childExitStatus = 1;
+								}
 							}
 							Execute(parsedUserInput, &childExitStatus);
 							break;
