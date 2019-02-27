@@ -146,8 +146,8 @@ void StatusBuiltIn(int childExitStatusIn){
 		fflush(stdout);
 	}
 	else{
-		printf("neither WIFEXITED or WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
-		fflush(stdout); exit(1); 
+		perror("neither WIFEXITED or WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
+		exit(1); 
 	}
 }
 
@@ -264,8 +264,8 @@ void GetInputString(char *userInputString){
 	size_t characters;
 	buffer = (char *)malloc(bufsize * sizeof(char));
 	if(buffer == NULL){
-		printf("GETLINE BUFFER ERROR, UNABLE TO ALLOCATE\n");
-		fflush(stdout); exit(1);
+		perror("GETLINE BUFFER ERROR, UNABLE TO ALLOCATE\n");
+		exit(1);
 	}
 	while(1){
 		characters = getline(&buffer, &bufsize, stdin);
@@ -310,8 +310,8 @@ char *GetPID(){
 	fflush(stdout);
 	char *stringPID = malloc(length + 1);
 	if(stringPID == NULL){
-		printf("ERROR, NOT ALLOCATED\n");
-		fflush(stdout); exit(1);
+		perror("ERROR, NOT ALLOCATED\n");
+		exit(1);
 	}
 	snprintf(stringPID, length + 1, "%d", pid);
 	fflush(stdout);
@@ -450,7 +450,7 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 	parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
 
 	if(parsedInput[inputCount] == NULL){
-		printf("USER INPUT MALLOC ERROR\n");
+		perror("USER INPUT MALLOC ERROR\n");
 		fflush(stdout); exit(1);
 	}
 
@@ -491,7 +491,7 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 					parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
 
 					if(parsedInput[inputCount] == NULL){
-						printf("USER INPUT MALLOC ERROR\n");
+						perror("USER INPUT MALLOC ERROR\n");
 						fflush(stdout); exit(1);
 					}
 
@@ -618,7 +618,7 @@ int main(){
 
 		char **parsedUserInput= malloc((MAX_ARGS) * sizeof(char*));
 		if(parsedUserInput == NULL){
-			printf("USER INPUT MALLOC ERROR\n");
+			perror("USER INPUT MALLOC ERROR\n");
 			fflush(stdout); exit(1);
 		}
 
