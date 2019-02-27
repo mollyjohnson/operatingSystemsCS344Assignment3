@@ -451,7 +451,7 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 
 	if(parsedInput[inputCount] == NULL){
 		perror("USER INPUT MALLOC ERROR\n");
-		fflush(stdout); exit(1);
+		exit(1);
 	}
 
 	strcpy(parsedInput[inputCount], token);
@@ -492,7 +492,7 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 
 					if(parsedInput[inputCount] == NULL){
 						perror("USER INPUT MALLOC ERROR\n");
-						fflush(stdout); exit(1);
+						exit(1);
 					}
 
 					strcpy(parsedInput[inputCount], token);
@@ -596,6 +596,9 @@ int main(){
 	int foregroundProcessCount = 0;
 	int backgroundProcessCount = 0;
 	int forkCount = 0;
+
+	//Instructor brewster on osu cs 344 slack message board stated this kind of fixed array to store
+	//PIDs was acceptable for this assignment (his example was an array of 128 integer pids).
 	int backgroundPidArray[1000];
 	int foregroundPidArray[1000];
 
@@ -619,7 +622,7 @@ int main(){
 		char **parsedUserInput= malloc((MAX_ARGS) * sizeof(char*));
 		if(parsedUserInput == NULL){
 			perror("USER INPUT MALLOC ERROR\n");
-			fflush(stdout); exit(1);
+			exit(1);
 		}
 
 		printf(": ");
@@ -686,24 +689,24 @@ int main(){
 								printf("foreground input file is gonna be redirected!\n");fflush(stdout);
 								sourceFD = open(inputFile, O_RDONLY);
 								if(sourceFD == -1){
-									perror("source open() error\n"); exit(1);
+									perror("source open() error\n"); childExitStatus = 1;
 								}
 								printf("sourceFD = %d\n", sourceFD);
 								result = dup2(sourceFD, 0);
 								if(result == -1){
-									perror("source dup2() error\n"); exit(1);
+									perror("source dup2() error\n"); childExitStatus = 1;
 								}
 							}
 							if(NeedsOutputRedirect(outputFile) == TRUE){
 								printf("foreground output file is gonna be redirected!\n"); fflush(stdout);
 								targetFD = open(outputFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 								if(targetFD == -1){
-									perror("target open() error\n"); exitStatus = 1;
+									perror("target open() error\n"); childExitStatus = 1;
 								}
 								printf("targetFD = %d\n", targetFD);
 								result = dup2(targetFD, 1);
 								if(result == -1){
-									perror("target dup2() error\n"); exitStatus = 1;
+									perror("target dup2() error\n"); childExitStatus = 1;
 								}
 							}
 							Execute(parsedUserInput, &childExitStatus);
