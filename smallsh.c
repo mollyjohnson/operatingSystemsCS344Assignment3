@@ -73,10 +73,36 @@ void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
 void ExitBuiltIn();
 //void RedirectInputFile(char *inputFileIn, int *sourceFDIn);
-//void RedirectOutputFile(char *outputFileIn, int *targetFDIn);
+int RedirectOutputFile(char *outputFileIn, int *targetFDIn);
 //void RedirectDevNull();
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+int RedirectOutputFile(char *outputFileIn, int *targetFDIn){
+	int childExitStat = 0;
+	int dupResult;
+	*targetFDIn = open(outputFileIn, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if(*targetFDIn == -1){
+		printf("target open() error\n"); fflush(stdout);
+		childExitStat = 1;
+	}
+	printf("targetFD = %d\n", *targetFDIn);
+	int target = (*targetFDIn);
+	dupResult = dup2(target, 1);
+	if(dupResult == -1){
+		printf("target dup2() error\n"); fflush(stdout);
+		childExitStat = 1;
+	}	
+	return childExitStat;
+}
 
 /*
 NAME
@@ -697,15 +723,7 @@ int main(){
 							}
 							if(NeedsOutputRedirect(outputFile) == TRUE){
 								printf("foreground output file is gonna be redirected!\n"); fflush(stdout);
-								targetFD = open(outputFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-								if(targetFD == -1){
-									perror("target open() error\n"); childExitStatus = 1;
-								}
-								printf("targetFD = %d\n", targetFD);
-								result = dup2(targetFD, 1);
-								if(result == -1){
-									perror("target dup2() error\n"); childExitStatus = 1;
-								}
+								childExitStatus = RedirectOutputFile(outputFile, &targetFD);								
 							}
 							Execute(parsedUserInput, &childExitStatus);
 							break;
