@@ -17,7 +17,7 @@ in the assignment instructions to make sure the output buffers get flushed every
 //https://stackoverflow.com/questions/8480929/scratchbox2-returns-implicit-declaration-of-function-getline-among-other-weir
 #define _GNU_SOURCE
 
-//include all header files
+//include all header files:
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -33,8 +33,7 @@ in the assignment instructions to make sure the output buffers get flushed every
 #include <signal.h>
 #include <errno.h>
 
-//constant macro definitions
-
+//constant macro definitions:
 //max values for chars and args were determined by the CS344 assignment3 instructions
 //(max chars is actually 2048 but i added one additional char for the null terminator).
 //(max args is actually 2048 but i added one additional arg for the NULL arg req'd to null-terminate
@@ -49,13 +48,12 @@ in the assignment instructions to make sure the output buffers get flushed every
 #define TRUE 1
 #define NO_ACTION "NO_ACTION"
 
-//global variables
-
+//global variables:
 //flag for if background is possible (if SIGSTP command given, should ignore "&" and
 //just run it as a foreground command)
 int backgroundPossibleGlobal = TRUE;
 
-//function declarations
+//function declarations:
 int StringMatch(char *string1, char *string2);
 void GetInputString(char *userInputString);
 char *GetPID();
