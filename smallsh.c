@@ -166,7 +166,7 @@ SYNOPSIS
 DESCRIPTION
 
 */
-void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[]){
+void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[], int childExitStatusIn){
 	printf("hey you're in the EXIT function correctly\n"); fflush(stdout);	
 	if(foregroundProcessCountIn > 0){
 		for(int k = 0; k < foregroundProcessCountIn; k++){
@@ -180,6 +180,7 @@ void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int
 			kill(backgroundPidArrayIn[m], SIGKILL);
 		}
 	}
+	exit(childExitStatusIn);
 }
 
 /*
@@ -693,7 +694,7 @@ int main(){
 
 		if(IsExit(parsedUserInput[0]) == TRUE){
 			printf("user entered exit\n"); fflush(stdout);
-			ExitBuiltIn(foregroundProcessCount, backgroundProcessCount, backgroundPidArray, foregroundPidArray);
+			ExitBuiltIn(foregroundProcessCount, backgroundProcessCount, backgroundPidArray, foregroundPidArray, childExitStatus);
 		}
 		else if(IsStatus(parsedUserInput[0]) == TRUE){
 			printf("user entered status\n"); fflush(stdout); 
