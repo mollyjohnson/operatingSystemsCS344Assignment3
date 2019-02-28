@@ -72,12 +72,13 @@ void ChangeDirBuiltInNoArgs();
 void ChangeDirBuiltInOneArg(char *directoryArg);
 void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
-void ExitBuiltIn();
 int RedirectInputFile(char *inputFileIn);
 int RedirectOutputFile(char *outputFileIn);
 //void RedirectDevNull();
+void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[]);
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
+//void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[];
 
 /*
 NAME
@@ -723,7 +724,48 @@ int main(){
 			//mode is currently allowed
 			if((isBackground == TRUE) && (backgroundPossibleGlobal == TRUE)){
 				printf("user wants background mode & it's allowed\n"); fflush(stdout);
-
+				pid_t backgroundspawnpid = -5;
+				if(forkCount < MAX_FORKS){
+					backgroundspawnpid = fork();
+					switch(backgroundspawnpid){
+						case -1:
+							perror("Hull Breach!"); exit(1); //error, no child process created
+							break;
+						case 0: //i am the child
+							printf("i am the background child!\n"); fflush(stdout);
+							printf("background child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
+							sleep(1);
+							printf("background child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
+							if(NeedsInputRedirect(inputFile) == TRUE){
+								printf("background input file is gonna be redirected!\n");fflush(stdout);
+								if(RedirectInputFile(inputFile) == 1){
+									childExitStatus = 1;
+									exit(childExitStatus);
+								}
+							}
+							if(NeedsOutputRedirect(outputFile) == TRUE){
+								printf("background output file is gonna be redirected!\n"); fflush(stdout);
+								if(RedirectOutputFile(outputFile) == 1){
+									childExitStatus = 1;
+									exit(childExitStatus);
+								}
+							}
+							Execute(parsedUserInput, &childExitStatus);
+							break;	
+						default: //i am the parent
+							printf("i am the parent!\n"); fflush(stdout);
+							printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
+							sleep(2);
+							printf("parent (%d): waiting for child (%d) to terminate\n", getpid(), backgroundspawnpid); fflush(stdout);
+							backgroundPidArray[backgroundProcessCount] = backgroundspawnpid;
+							backgroundProcessCount++;
+							pid_t actualBackgroundPID = waitpid(backgroundspawnpid, &childExitStatus, WNOHANG);
+							break;
+					}
+				}
+				else{ //fork bombed
+					perror("FORK BOMB! EXITING!"); exit(1);
+				}
 			}
 			//if the user didn't indicate to run the process in the background or if
 			//they did want to run the process in the background but background mode
@@ -794,7 +836,6 @@ int main(){
 				fflush(stdout);
 			}
 		}
-
 
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
