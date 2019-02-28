@@ -36,11 +36,12 @@ in the assignment instructions to make sure the output buffers get flushed every
 //constant macro definitions:
 //max values for chars and args were determined by the CS344 assignment3 instructions
 //(max chars is actually 2048 but i added one additional char for the null terminator).
-//(max args is actually 2048 but i added one additional arg for the NULL arg req'd to null-terminate
-//an array sent to execvp() so execvp() knows when the end of the array has been reached)
+//(max args is actually 512  but i added one additional arg for the NULL arg req'd to null-terminate
+//an array sent to execvp() so execvp() knows when the end of the array has been reached).
+//(max forks an arbitrary value i created to prevent fork-bombing the server).
 #define MAX_CHARS 2049
 #define MAX_ARGS 513
-#define MAX_FORKS 100
+#define MAX_FORKS 200
 #define EXIT "exit"
 #define CD "cd"
 #define STATUS "status"
@@ -164,8 +165,20 @@ SYNOPSIS
 DESCRIPTION
 
 */
-void ExitBuiltIn(){
-	
+void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[]){
+	printf("hey you're in the EXIT function correctly\n"); fflush(stdout);	
+	if(foregroundProcessCountIn > 0){
+		for(int k = 0; k < foregroundProcessCountIn; k++){
+			printf("killing foreground process %d\n", k + 1); fflush(stdout);
+			kill(foregroundPidArrayIn[k], SIGKILL);
+		}
+	}
+	if(backgroundProcessCountIn > 0){
+		for(int m = 0; m < backgroundProcessCountIn; m++){
+			printf("killing background process %d\n", m + 1); fflush(stdout);
+			kill(backgroundPidArrayIn[m], SIGKILL);
+		}
+	}
 }
 
 /*
@@ -311,6 +324,7 @@ void GetInputString(char *userInputString){
 	buffer = (char *)malloc(bufsize * sizeof(char));
 	if(buffer == NULL){
 		perror("GETLINE BUFFER ERROR, UNABLE TO ALLOCATE\n");
+		perror("GETLINE BUFFER ERROR, UNABLE TO ALLOCATE\n");
 		exit(1);
 	}
 	while(1){
@@ -328,7 +342,6 @@ void GetInputString(char *userInputString){
 		strcpy(userInputString, buffer);
 	}
 	else{
-		
 		strcpy(userInputString, NO_ACTION);
 	}
 	
@@ -679,6 +692,7 @@ int main(){
 
 		if(IsExit(parsedUserInput[0]) == TRUE){
 			printf("user entered exit\n"); fflush(stdout);
+			ExitBuiltIn(foregroundProcessCount, backgroundProcessCount, backgroundPidArray, foregroundPidArray);
 		}
 		else if(IsStatus(parsedUserInput[0]) == TRUE){
 			printf("user entered status\n"); fflush(stdout); 
@@ -734,6 +748,7 @@ int main(){
 								printf("foreground input file is gonna be redirected!\n");fflush(stdout);
 								if(RedirectInputFile(inputFile) == 1){
 									childExitStatus = 1;
+									exit(childExitStatus);
 								}
 								
 							}
@@ -741,6 +756,7 @@ int main(){
 								printf("foreground output file is gonna be redirected!\n"); fflush(stdout);
 								if(RedirectOutputFile(outputFile) == 1){
 									childExitStatus = 1;
+									exit(childExitStatus);
 								}
 							}
 							Execute(parsedUserInput, &childExitStatus);
@@ -799,6 +815,7 @@ int main(){
 		parsedUserInput= NULL;
 
 	}while(IsExit(command) == FALSE);
+	printf("DOES THIS PRINT AFTER THE USER HITS EXIT?\n"); fflush(stdout);
 		
 	return 0;
 }
