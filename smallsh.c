@@ -99,10 +99,13 @@ void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidAr
 			if(actualBackgroundPID == -1){
 				perror("waitpid for background process error!\n"); exit(1);
 			}
-			else if(actualBackgroundPID != 0){ //0 means status for the pid not available
-				StatusBuiltIn(backgroundStatTemp);
+			else if(actualBackgroundPID != 0){ //0 means status for the pid not available, 0 means child process terminated
+				//StatusBuiltIn(backgroundStatTemp);
 				printf("background pid %d is done: ", actualBackgroundPID);
-
+				for(int i = k; i < *backgroundProcessCountIn - 1; i++){
+					backgroundPidArrayIn[i] = backgroundPidArrayIn[i + 1];					
+				}
+				(*backgroundProcessCountIn) = ((*backgroundProcessCountIn) - 1);
 			}
 		}
 	}
@@ -860,8 +863,9 @@ int main(){
 				fflush(stdout);
 			}
 		}
+		printf("THE BACKGROUND PROCESS COUNT IS: %d\n", backgroundProcessCount);
 		if(backgroundProcessCount > 0){
-			for(int m = 0; m < foregroundProcessCount; m++){
+			for(int m = 0; m < backgroundProcessCount; m++){
 				printf("background process %d pid: %d\n", m + 1, backgroundPidArray[m]);
 				fflush(stdout);
 			}
