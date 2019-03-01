@@ -768,7 +768,8 @@ int main(){
 							printf("i am the background child!\n"); fflush(stdout);
 							printf("background child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
 							sleep(1);
-							printf("background child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
+							//printf("background child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
+							printf("background pid is %d\n", getpid()); fflush(stdout);
 							if(NeedsInputRedirect(inputFile) == TRUE){
 								printf("background input file is gonna be redirected!\n");fflush(stdout);
 								if(RedirectInputFile(inputFile) == 1){
@@ -776,12 +777,18 @@ int main(){
 									exit(childExitStatus);
 								}
 							}
+							else{ //redirect input to dev/null
+
+							}
 							if(NeedsOutputRedirect(outputFile) == TRUE){
 								printf("background output file is gonna be redirected!\n"); fflush(stdout);
 								if(RedirectOutputFile(outputFile) == 1){
 									childExitStatus = 1;
 									exit(childExitStatus);
 								}
+							}
+							else{ //redirect output to dev/null
+
 							}
 							Execute(parsedUserInput, &childExitStatus);
 							break;	
