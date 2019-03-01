@@ -74,13 +74,37 @@ void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
 int RedirectInputFile(char *inputFileIn);
 int RedirectOutputFile(char *outputFileIn);
-//void RedirectInputDevNull();
-//void RedirectOutputDevNull();
+void RedirectInputDevNull();
+void RedirectOutputDevNull();
 void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[], int childExitStatusIn);
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
-				
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void RedirectInputDevNull(){
+
+}
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/				
+void RedirectOutputDevNull(){
+	
+}
+
 /*
 NAME
 
