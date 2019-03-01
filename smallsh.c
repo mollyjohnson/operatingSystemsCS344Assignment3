@@ -278,9 +278,10 @@ DESCRIPTION
 */
 void Execute(char **parsedInput, int *childExitStatusIn){
 	if(execvp(parsedInput[0], parsedInput) < 0){
-		perror("Failure with execvp()! Command could not be executed. Exit status will be set to 1.\n");
+		//perror("Failure with execvp()! Command could not be executed. Exit status will be set to 1.\n");
+		printf("%s: no such file or directory\n", parsedInput[0]); fflush(stdout);
 		*childExitStatusIn = 1;
-		printf("child exit exec error status is: %d\n", *childExitStatusIn); fflush(stdout); 
+		//printf("child exit exec error status is: %d\n", *childExitStatusIn); fflush(stdout); 
 		exit(*childExitStatusIn);
 	}
 }
