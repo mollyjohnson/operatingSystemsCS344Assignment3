@@ -74,36 +74,10 @@ void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
 int RedirectInputFile(char *inputFileIn);
 int RedirectOutputFile(char *outputFileIn);
-void RedirectInputDevNull();
-void RedirectOutputDevNull();
 void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[], int childExitStatusIn);
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
-
-/*
-NAME
-
-SYNOPSIS
-
-DESCRIPTION
-
-*/
-void RedirectInputDevNull(){
-
-}
-
-/*
-NAME
-
-SYNOPSIS
-
-DESCRIPTION
-
-*/				
-void RedirectOutputDevNull(){
-	
-}
 
 /*
 NAME
@@ -802,7 +776,7 @@ int main(){
 								}
 							}
 							else{ //redirect input to dev/null
-
+								RedirectInputFile("/dev/null");
 							}
 							if(NeedsOutputRedirect(outputFile) == TRUE){
 								printf("background output file is gonna be redirected!\n"); fflush(stdout);
@@ -812,7 +786,7 @@ int main(){
 								}
 							}
 							else{ //redirect output to dev/null
-
+								RedirectOutputFile("/dev/null");
 							}
 							Execute(parsedUserInput, &childExitStatus);
 							break;	
