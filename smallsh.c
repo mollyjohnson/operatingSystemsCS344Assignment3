@@ -154,7 +154,7 @@ int RedirectInputFile(char *inputFileIn){
 		printf("source open() error\n"); fflush(stdout);
 		childExitStat = 1;
 	}
-	printf("sourceFD = %d\n", sourceFD); fflush(stdout); 
+	//printf("sourceFD = %d\n", sourceFD); fflush(stdout); 
 	int dupResult = dup2(sourceFD, 0);
 	if(dupResult == -1){
 		printf("source dup2() error\n"); fflush(stdout);
@@ -178,7 +178,7 @@ int RedirectOutputFile(char *outputFileIn){
 		printf("target open() error\n"); fflush(stdout);
 		childExitStat = 1;
 	}
-	printf("targetFD = %d\n", targetFD); fflush(stdout); 
+	//printf("targetFD = %d\n", targetFD); fflush(stdout); 
 	int dupResult = dup2(targetFD, 1);
 	if(dupResult == -1){
 		printf("target dup2() error\n"); fflush(stdout);
