@@ -174,13 +174,13 @@ int RedirectOutputFile(char *outputFileIn){
 	int childExitStat = 0;
 	int targetFD = open(outputFileIn, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if(targetFD == -1){
-		printf("target open() error\n"); fflush(stdout);
+		printf("cannot open %s for output\n", outputFileIn); fflush(stdout);
 		childExitStat = 1;
 	}
 	//printf("targetFD = %d\n", targetFD); fflush(stdout); 
 	int dupResult = dup2(targetFD, 1);
 	if(dupResult == -1){
-		printf("target dup2() error\n"); fflush(stdout);
+		//printf("target dup2() error\n"); fflush(stdout);
 		childExitStat = 1;
 	}	
 	return childExitStat;
@@ -816,6 +816,7 @@ int main(){
 							sleep(2);
 							//printf("parent (%d): waiting for child (%d) to terminate\n", getpid(), backgroundspawnpid); fflush(stdout);
 							backgroundPidArray[backgroundProcessCount] = backgroundspawnpid;
+							printf("background pid is %d\n", backgroundspawnpid); fflush(stdout);
 							backgroundProcessCount++;
 							//pid_t actualBackgroundPID = waitpid(backgroundspawnpid, &childExitStatus, WNOHANG);
 							break;
