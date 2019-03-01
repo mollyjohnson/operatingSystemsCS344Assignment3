@@ -90,18 +90,16 @@ DESCRIPTION
 */
 void StatusBuiltInBackground(int backgroundChildExitStatusIn){
 	if(WIFEXITED(backgroundChildExitStatusIn) != 0){
-		printf("the background process exited normally\n");
-		fflush(stdout);
+		//printf("the background process exited normally\n"); fflush(stdout);
 		int backgroundExitStatus = WEXITSTATUS(backgroundChildExitStatusIn);
-		printf("the exit status of the background process was: %d\n", backgroundExitStatus);
-		fflush(stdout);
+		//printf("the exit status of the background process was: %d\n", backgroundExitStatus); fflush(stdout);
+		printf("background exit value %d\n", backgroundExitStatus); fflush(stdout);
 	}
 	else if(WIFSIGNALED(backgroundChildExitStatusIn) != 0){
-		printf("the background process was terminated by a signal\n");
-		fflush(stdout);
+		//printf("the background process was terminated by a signal\n"); fflush(stdout);
 		int backgroundTermSignal = WTERMSIG(backgroundChildExitStatusIn);
-		printf("the terminating signal of the background process was: %d\n", backgroundTermSignal);
-		fflush(stdout);
+		//printf("the terminating signal of the background process was: %d\n", backgroundTermSignal); fflush(stdout);
+		printf("terminated by signal %d\n", backgroundTermSignal); fflush(stdout);
 	}
 	else{
 		perror("neither WIFEXITED nor WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
@@ -252,14 +250,16 @@ DESCRIPTION
 */
 void StatusBuiltIn(int childExitStatusIn){
 	if(WIFEXITED(childExitStatusIn) != 0){
-		printf("the foreground process exited normally\n"); fflush(stdout);
+		//printf("the foreground process exited normally\n"); fflush(stdout);
 		int exitStatus = WEXITSTATUS(childExitStatusIn);
-		printf("the exit status of the last foreground process was: %d\n", exitStatus); fflush(stdout);
+		//printf("the exit status of the last foreground process was: %d\n", exitStatus); fflush(stdout);
+		printf("exit value %d\n", exitStatus); fflush(stdout);
 	}
 	else if(WIFSIGNALED(childExitStatusIn) != 0){
-		printf("the foreground process was terminated by a signal\n"); fflush(stdout);
+		//printf("the foreground process was terminated by a signal\n"); fflush(stdout);
 		int termSignal = WTERMSIG(childExitStatusIn);
-		printf("the terminating signal of the last foreground process was: %d\n", termSignal); fflush(stdout);
+		//printf("the terminating signal of the last foreground process was: %d\n", termSignal); fflush(stdout);
+		printf("terminated by signal %d\n", termSignal); fflush(stdout);
 	}
 	else{
 		perror("neither WIFEXITED nor WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
