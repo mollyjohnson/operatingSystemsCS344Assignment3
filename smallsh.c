@@ -72,12 +72,42 @@ void ChangeDirBuiltInNoArgs();
 void ChangeDirBuiltInOneArg(char *directoryArg);
 void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
+void StatusBuiltInBackground(int backgroundChildExitStatusIn);
 int RedirectInputFile(char *inputFileIn);
 int RedirectOutputFile(char *outputFileIn);
 void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[], int childExitStatusIn);
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void StatusBuiltInBackground(int backgroundChildExitStatusIn){
+	if(WIFEXITED(backgroundChildExitStatusIn) != 0){
+		printf("the background process exited normally\n");
+		fflush(stdout);
+		int backgroundExitStatus = WEXITSTATUS(backgroundChildExitStatusIn);
+		printf("the exit status of the background process was: %d\n", backgroundExitStatus);
+		fflush(stdout);
+	}
+	else if(WIFSIGNALED(backgroundChildExitStatusIn) != 0){
+		printf("the background process was terminated by a signal\n");
+		fflush(stdout);
+		int backgroundTermSignal = WTERMSIG(backgroundChildExitStatusIn);
+		printf("the terminating signal of the background process was: %d\n", backgroundTermSignal);
+		fflush(stdout);
+	}
+	else{
+		perror("neither WIFEXITED nor WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
+		exit(1);
+	}
+}
 
 /*
 NAME
@@ -98,11 +128,11 @@ void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidAr
 				perror("waitpid for background process error!\n"); exit(1);
 			}
 			else if(actualBackgroundPID != 0){ //0 means status for the pid not available, 0 means child process terminated
-				//StatusBuiltIn(backgroundStatTemp);
 				printf("background pid %d is done: ", actualBackgroundPID);
 				for(int i = k; i < *backgroundProcessCountIn - 1; i++){
 					backgroundPidArrayIn[i] = backgroundPidArrayIn[i + 1];					
 				}
+				StatusBuiltInBackground(backgroundStatTemp);
 				(*backgroundProcessCountIn) = ((*backgroundProcessCountIn) - 1);
 			}
 		}
@@ -236,7 +266,7 @@ void StatusBuiltIn(int childExitStatusIn){
 		fflush(stdout);
 	}
 	else{
-		perror("neither WIFEXITED or WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
+		perror("neither WIFEXITED nor WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
 		exit(1); 
 	}
 }
