@@ -226,7 +226,7 @@ DESCRIPTION
 
 */
 void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[], int childExitStatusIn){
-	printf("hey you're in the EXIT function correctly\n"); fflush(stdout);	
+	//printf("hey you're in the EXIT function correctly\n"); fflush(stdout);	
 	if(foregroundProcessCountIn > 0){
 		for(int k = 0; k < foregroundProcessCountIn; k++){
 			//printf("killing foreground process %d\n", k + 1); fflush(stdout);
