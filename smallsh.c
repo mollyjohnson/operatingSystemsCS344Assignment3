@@ -149,13 +149,14 @@ int RedirectInputFile(char *inputFileIn){
 	int childExitStat = 0;
 	int sourceFD = open(inputFileIn, O_RDONLY);
 	if(sourceFD == -1){
-		printf("source open() error\n"); fflush(stdout);
+		//printf("source open() error\n"); fflush(stdout);
 		childExitStat = 1;
+		printf("cannot open %s for input\n", inputFileIn); fflush(stdout);	
 	}
 	//printf("sourceFD = %d\n", sourceFD); fflush(stdout); 
 	int dupResult = dup2(sourceFD, 0);
 	if(dupResult == -1){
-		printf("source dup2() error\n"); fflush(stdout);
+		//printf("source dup2() error\n"); fflush(stdout);
 		childExitStat = 1;
 	}
 	return childExitStat;
