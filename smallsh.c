@@ -128,7 +128,7 @@ void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidAr
 				perror("waitpid for background process error!\n"); exit(1);
 			}
 			else if(actualBackgroundPID != 0){ //0 means status for the pid not available, 0 means child process terminated
-				printf("background pid %d is done: ", actualBackgroundPID);
+				printf("background pid %d is done: ", actualBackgroundPID); fflush(stdout);
 				for(int i = k; i < *backgroundProcessCountIn - 1; i++){
 					backgroundPidArrayIn[i] = backgroundPidArrayIn[i + 1];					
 				}
@@ -154,7 +154,7 @@ int RedirectInputFile(char *inputFileIn){
 		printf("source open() error\n"); fflush(stdout);
 		childExitStat = 1;
 	}
-	printf("sourceFD = %d\n", sourceFD);
+	printf("sourceFD = %d\n", sourceFD); fflush(stdout); 
 	int dupResult = dup2(sourceFD, 0);
 	if(dupResult == -1){
 		printf("source dup2() error\n"); fflush(stdout);
@@ -178,7 +178,7 @@ int RedirectOutputFile(char *outputFileIn){
 		printf("target open() error\n"); fflush(stdout);
 		childExitStat = 1;
 	}
-	printf("targetFD = %d\n", targetFD);
+	printf("targetFD = %d\n", targetFD); fflush(stdout); 
 	int dupResult = dup2(targetFD, 1);
 	if(dupResult == -1){
 		printf("target dup2() error\n"); fflush(stdout);
@@ -252,18 +252,14 @@ DESCRIPTION
 */
 void StatusBuiltIn(int childExitStatusIn){
 	if(WIFEXITED(childExitStatusIn) != 0){
-		printf("the process exited normally\n");
-		fflush(stdout);
+		printf("the process exited normally\n"); fflush(stdout);
 		int exitStatus = WEXITSTATUS(childExitStatusIn);
-		printf("the exit status of the last foreground process was: %d\n", exitStatus);
-		fflush(stdout);
+		printf("the exit status of the last foreground process was: %d\n", exitStatus); fflush(stdout);
 	}
 	else if(WIFSIGNALED(childExitStatusIn) != 0){
-		printf("the process was terminated by a signal\n");
-		fflush(stdout);
+		printf("the process was terminated by a signal\n"); fflush(stdout);
 		int termSignal = WTERMSIG(childExitStatusIn);
-		printf("the terminating signal of the last foreground process was: %d\n", termSignal);
-		fflush(stdout);
+		printf("the terminating signal of the last foreground process was: %d\n", termSignal); fflush(stdout);
 	}
 	else{
 		perror("neither WIFEXITED nor WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
@@ -283,7 +279,7 @@ void Execute(char **parsedInput, int *childExitStatusIn){
 	if(execvp(parsedInput[0], parsedInput) < 0){
 		perror("Failure with execvp()! Command could not be executed. Exit status will be set to 1.\n");
 		*childExitStatusIn = 1;
-		printf("child exit exec error status is: %d\n", *childExitStatusIn);
+		printf("child exit exec error status is: %d\n", *childExitStatusIn); fflush(stdout); 
 		exit(*childExitStatusIn);
 	}
 }
@@ -311,8 +307,7 @@ DESCRIPTION
 */
 void ChangeDirBuiltInOneArg(char *directoryArg){
 	if(chdir(directoryArg) != 0){
-		printf("chdir() to your specified directory has failed, no such directory there.\n");
-		fflush(stdout);
+		printf("chdir() to your specified directory has failed, no such directory there.\n"); fflush(stdout);
 	}
 }
 
@@ -426,15 +421,13 @@ char *GetPID(){
 	int pid = getpid();	
 
 	//convert int pid into string pid
-	int length = snprintf(NULL, 0, "%d", pid);
-	fflush(stdout);
+	int length = snprintf(NULL, 0, "%d", pid); fflush(stdout);
 	char *stringPID = malloc(length + 1);
 	if(stringPID == NULL){
 		perror("ERROR, NOT ALLOCATED\n");
 		exit(1);
 	}
-	snprintf(stringPID, length + 1, "%d", pid);
-	fflush(stdout);
+	snprintf(stringPID, length + 1, "%d", pid); fflush(stdout);
 	char *copyStringPID = stringPID;
 	strcpy(returnStringPID, copyStringPID);
 
@@ -745,8 +738,7 @@ int main(){
 			exit(1);
 		}
 
-		printf(": ");
-		fflush(stdout);
+		printf(": "); fflush(stdout);
 
 		GetInputString(userInputStr);
 
@@ -796,10 +788,9 @@ int main(){
 							printf("i am the background child!\n"); fflush(stdout);
 							printf("background child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
 							sleep(1);
-							//printf("background child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
 							printf("background pid is %d\n", getpid()); fflush(stdout);
 							if(NeedsInputRedirect(inputFile) == TRUE){
-								printf("background input file is gonna be redirected!\n");fflush(stdout);
+								printf("background input file is gonna be redirected!\n"); fflush(stdout);
 								if(RedirectInputFile(inputFile) == 1){
 									childExitStatus = 1;
 									exit(childExitStatus);
@@ -894,15 +885,13 @@ int main(){
 
 		if(foregroundProcessCount > 0){
 			for(int k = 0; k < foregroundProcessCount; k++){
-				printf("foreground process %d pid: %d\n", k + 1, foregroundPidArray[k]);
-				fflush(stdout);
+				printf("foreground process %d pid: %d\n", k + 1, foregroundPidArray[k]); fflush(stdout);
 			}
 		}
-		printf("THE BACKGROUND PROCESS COUNT IS: %d\n", backgroundProcessCount);
+		printf("THE BACKGROUND PROCESS COUNT IS: %d\n", backgroundProcessCount); fflush(stdout); 
 		if(backgroundProcessCount > 0){
 			for(int m = 0; m < backgroundProcessCount; m++){
-				printf("background process %d pid: %d\n", m + 1, backgroundPidArray[m]);
-				fflush(stdout);
+				printf("background process %d pid: %d\n", m + 1, backgroundPidArray[m]); fflush(stdout);
 			}
 		}
 
