@@ -229,13 +229,13 @@ void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int
 	printf("hey you're in the EXIT function correctly\n"); fflush(stdout);	
 	if(foregroundProcessCountIn > 0){
 		for(int k = 0; k < foregroundProcessCountIn; k++){
-			printf("killing foreground process %d\n", k + 1); fflush(stdout);
+			//printf("killing foreground process %d\n", k + 1); fflush(stdout);
 			kill(foregroundPidArrayIn[k], SIGKILL);
 		}
 	}
 	if(backgroundProcessCountIn > 0){
 		for(int m = 0; m < backgroundProcessCountIn; m++){
-			printf("killing background process %d\n", m + 1); fflush(stdout);
+			//printf("killing background process %d\n", m + 1); fflush(stdout);
 			kill(backgroundPidArrayIn[m], SIGKILL);
 		}
 	}
@@ -252,12 +252,12 @@ DESCRIPTION
 */
 void StatusBuiltIn(int childExitStatusIn){
 	if(WIFEXITED(childExitStatusIn) != 0){
-		printf("the process exited normally\n"); fflush(stdout);
+		printf("the foreground process exited normally\n"); fflush(stdout);
 		int exitStatus = WEXITSTATUS(childExitStatusIn);
 		printf("the exit status of the last foreground process was: %d\n", exitStatus); fflush(stdout);
 	}
 	else if(WIFSIGNALED(childExitStatusIn) != 0){
-		printf("the process was terminated by a signal\n"); fflush(stdout);
+		printf("the foreground process was terminated by a signal\n"); fflush(stdout);
 		int termSignal = WTERMSIG(childExitStatusIn);
 		printf("the terminating signal of the last foreground process was: %d\n", termSignal); fflush(stdout);
 	}
@@ -380,7 +380,6 @@ void GetInputString(char *userInputString){
 	buffer = (char *)malloc(bufsize * sizeof(char));
 	if(buffer == NULL){
 		perror("GETLINE BUFFER ERROR, UNABLE TO ALLOCATE\n");
-		perror("GETLINE BUFFER ERROR, UNABLE TO ALLOCATE\n");
 		exit(1);
 	}
 	while(1){
@@ -437,7 +436,6 @@ char *GetPID(){
 
 	//return string version of the int pid
 	return returnStringPID;
-
 }
 
 /*
@@ -745,29 +743,29 @@ int main(){
 		int numInputs = GetArgs(parsedUserInput, userInputStr, inputFile, outputFile, &isBackground);
 
 		if(IsExit(parsedUserInput[0]) == TRUE){
-			printf("user entered exit\n"); fflush(stdout);
+			//printf("user entered exit\n"); fflush(stdout);
 			ExitBuiltIn(foregroundProcessCount, backgroundProcessCount, backgroundPidArray, foregroundPidArray, childExitStatus);
 		}
 		else if(IsStatus(parsedUserInput[0]) == TRUE){
-			printf("user entered status\n"); fflush(stdout); 
+			//printf("user entered status\n"); fflush(stdout); 
 			StatusBuiltIn(childExitStatus);
 		}
 		else if(IsChangeDir(parsedUserInput[0]) == TRUE){
 			if(numInputs == 1){
-				printf("user entered change dir w no args\n"); fflush(stdout); 
+				//printf("user entered change dir w no args\n"); fflush(stdout); 
 				ChangeDirBuiltInNoArgs();
 			}
 			else if(numInputs > 1){
-				printf("user entered change dir w >= 1 arg\n"); fflush(stdout); 
-				printf("cd arg is: %s\n", parsedUserInput[1]); fflush(stdout); 
+				//printf("user entered change dir w >= 1 arg\n"); fflush(stdout); 
+				//printf("cd arg is: %s\n", parsedUserInput[1]); fflush(stdout); 
 				ChangeDirBuiltInOneArg(parsedUserInput[1]);
 			}
 		}
 		else if(IsNoAction(parsedUserInput[0]) == TRUE){
-			printf("no action should be taken\n"); fflush(stdout); 
+			//printf("no action should be taken\n"); fflush(stdout); 
 		}
 		else{
-			printf("user entered a non-built in\n"); fflush(stdout); 
+			//printf("user entered a non-built in\n"); fflush(stdout); 
 
 			//make the array NULL-terminated for execvp() so it knows where the end
 			//of the array is
@@ -776,7 +774,7 @@ int main(){
 			//if user indicated to run the process in the background AND background
 			//mode is currently allowed
 			if((isBackground == TRUE) && (backgroundPossibleGlobal == TRUE)){
-				printf("user wants background mode & it's allowed\n"); fflush(stdout);
+				//printf("user wants background mode & it's allowed\n"); fflush(stdout);
 				pid_t backgroundspawnpid = -5;
 				if(forkCount < MAX_FORKS){
 					backgroundspawnpid = fork();
@@ -785,12 +783,12 @@ int main(){
 							perror("Hull Breach!"); exit(1); //error, no child process created
 							break;
 						case 0: //i am the child
-							printf("i am the background child!\n"); fflush(stdout);
-							printf("background child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
+							//printf("i am the background child!\n"); fflush(stdout);
+							//printf("background child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
 							sleep(1);
-							printf("background pid is %d\n", getpid()); fflush(stdout);
+							//printf("background pid is %d\n", getpid()); fflush(stdout);
 							if(NeedsInputRedirect(inputFile) == TRUE){
-								printf("background input file is gonna be redirected!\n"); fflush(stdout);
+								//printf("background input file is gonna be redirected!\n"); fflush(stdout);
 								if(RedirectInputFile(inputFile) == 1){
 									childExitStatus = 1;
 									exit(childExitStatus);
@@ -800,7 +798,7 @@ int main(){
 								RedirectInputFile("/dev/null");
 							}
 							if(NeedsOutputRedirect(outputFile) == TRUE){
-								printf("background output file is gonna be redirected!\n"); fflush(stdout);
+								//printf("background output file is gonna be redirected!\n"); fflush(stdout);
 								if(RedirectOutputFile(outputFile) == 1){
 									childExitStatus = 1;
 									exit(childExitStatus);
@@ -812,10 +810,10 @@ int main(){
 							Execute(parsedUserInput, &childExitStatus);
 							break;	
 						default: //i am the parent
-							printf("i am the parent!\n"); fflush(stdout);
-							printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
+							//printf("i am the parent!\n"); fflush(stdout);
+							//printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
 							sleep(2);
-							printf("parent (%d): waiting for child (%d) to terminate\n", getpid(), backgroundspawnpid); fflush(stdout);
+							//printf("parent (%d): waiting for child (%d) to terminate\n", getpid(), backgroundspawnpid); fflush(stdout);
 							backgroundPidArray[backgroundProcessCount] = backgroundspawnpid;
 							backgroundProcessCount++;
 							//pid_t actualBackgroundPID = waitpid(backgroundspawnpid, &childExitStatus, WNOHANG);
@@ -830,7 +828,7 @@ int main(){
 			//they did want to run the process in the background but background mode
 			//isn't currently allowed
 			else{
-				printf("user wants foreground mode (or background and it's not allowed)\n"); fflush(stdout);
+				//printf("user wants foreground mode (or background and it's not allowed)\n"); fflush(stdout);
 				
 				pid_t spawnpid = -5;
 
@@ -841,12 +839,12 @@ int main(){
 							perror("Hull Breach!"); exit(1); //error, no child process created
 							break;
 						case 0: //i am the child
-							printf("i am the child!\n"); fflush(stdout);
-							printf("child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
+							//printf("i am the child!\n"); fflush(stdout);
+							//printf("child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
 							sleep(1);
-							printf("child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
+							//printf("child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
 							if(NeedsInputRedirect(inputFile) == TRUE){
-								printf("foreground input file is gonna be redirected!\n");fflush(stdout);
+								//printf("foreground input file is gonna be redirected!\n");fflush(stdout);
 								if(RedirectInputFile(inputFile) == 1){
 									childExitStatus = 1;
 									exit(childExitStatus);
@@ -854,7 +852,7 @@ int main(){
 								
 							}
 							if(NeedsOutputRedirect(outputFile) == TRUE){
-								printf("foreground output file is gonna be redirected!\n"); fflush(stdout);
+								//printf("foreground output file is gonna be redirected!\n"); fflush(stdout);
 								if(RedirectOutputFile(outputFile) == 1){
 									childExitStatus = 1;
 									exit(childExitStatus);
@@ -863,14 +861,14 @@ int main(){
 							Execute(parsedUserInput, &childExitStatus);
 							break;
 						default: //i am the parent
-							printf("i am the parent!\n"); fflush(stdout);
-							printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
+							//printf("i am the parent!\n"); fflush(stdout);
+							//printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
 							sleep(2);
-							printf("parent (%d): waiting for child(%d) to terminate\n", getpid(), spawnpid); fflush(stdout);
+							//printf("parent (%d): waiting for child(%d) to terminate\n", getpid(), spawnpid); fflush(stdout);
 							foregroundPidArray[foregroundProcessCount] = spawnpid;
 							foregroundProcessCount++;
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
-							printf("parent (%d): child(%d) terminated, exiting!\n", getpid(), actualPID); fflush(stdout);
+							//printf("parent (%d): child(%d) terminated, exiting!\n", getpid(), actualPID); fflush(stdout);
 							break;
 					}
 				}
@@ -880,9 +878,10 @@ int main(){
 			}
 		}
 
-		printf("num foreground processes run: %d\n", foregroundProcessCount); fflush(stdout);
-		printf("num background processes run: %d\n", backgroundProcessCount); fflush(stdout);
+		//printf("num foreground processes run: %d\n", foregroundProcessCount); fflush(stdout);
+		//printf("num background processes run: %d\n", backgroundProcessCount); fflush(stdout);
 
+		/*
 		if(foregroundProcessCount > 0){
 			for(int k = 0; k < foregroundProcessCount; k++){
 				printf("foreground process %d pid: %d\n", k + 1, foregroundPidArray[k]); fflush(stdout);
@@ -894,19 +893,22 @@ int main(){
 				printf("background process %d pid: %d\n", m + 1, backgroundPidArray[m]); fflush(stdout);
 			}
 		}
+		*/
 
 		CheckBackgroundProcesses(&backgroundProcessCount, backgroundPidArray, &backgroundExitStatus);
 
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
 
-		printf("command: %s\n", parsedUserInput[0]); fflush(stdout); 
+		//printf("command: %s\n", parsedUserInput[0]); fflush(stdout); 
+		/*
 		for(int k = 1; k < numInputs; k++){
 			printf("arg %d: %s\n", k, parsedUserInput[k]); fflush(stdout); 
 		}
-		printf("input file: %s\n", inputFile); fflush(stdout); 
-		printf("output file %s\n", outputFile); fflush(stdout); 
-		printf("background status is: %d\n", isBackground); fflush(stdout); 
+		*/
+		//printf("input file: %s\n", inputFile); fflush(stdout); 
+		//printf("output file %s\n", outputFile); fflush(stdout); 
+		//printf("background status is: %d\n", isBackground); fflush(stdout); 
 
 		for(int i = 0; i < numInputs; i++){
 			free(parsedUserInput[i]);
@@ -916,7 +918,7 @@ int main(){
 		parsedUserInput= NULL;
 
 	}while(IsExit(command) == FALSE);
-	printf("DOES THIS PRINT AFTER THE USER HITS EXIT?\n"); fflush(stdout);
+	//printf("DOES THIS PRINT AFTER THE USER HITS EXIT?\n"); fflush(stdout);
 		
 	return 0;
 }
