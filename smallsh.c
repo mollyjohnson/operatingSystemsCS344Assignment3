@@ -74,11 +74,39 @@ void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
 int RedirectInputFile(char *inputFileIn);
 int RedirectOutputFile(char *outputFileIn);
-//void RedirectDevNull();
-void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[]);
+//void RedirectInputDevNull();
+//void RedirectOutputDevNull();
+void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[], int childExitStatusIn);
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
-//void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[];
+void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
+				
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd){
+	if(*backgroundProcessCountIn > 0){
+		int backgroundStatTemp = *childExitStatusBckd; 
+		for(int k = 0; k < *backgroundProcessCountIn; k++){
+			pid_t backgroundSpawnPid = backgroundPidArrayIn[k];
+			pid_t actualBackgroundPID = waitpid(backgroundSpawnPid, &backgroundStatTemp, WNOHANG);
+			*childExitStatusBckd = backgroundStatTemp;
+			if(actualBackgroundPID == -1){
+				perror("waitpid for background process error!\n"); exit(1);
+			}
+			else if(actualBackgroundPID != 0){ //0 means status for the pid not available
+				StatusBuiltIn(backgroundStatTemp);
+				printf("background pid %d is done: ", actualBackgroundPID);
+
+			}
+		}
+	}
+}
 
 /*
 NAME
@@ -654,6 +682,7 @@ int main(){
 	//status before any foreground processes have been run it's zero). can be changed if a foreground
 	//process encounters errors and needs to exit w/ a non-zero status
 	int childExitStatus = 0;
+	int backgroundExitStatus = 0;
 	int foregroundProcessCount = 0;
 	int backgroundProcessCount = 0;
 	int forkCount = 0;
@@ -760,7 +789,7 @@ int main(){
 							printf("parent (%d): waiting for child (%d) to terminate\n", getpid(), backgroundspawnpid); fflush(stdout);
 							backgroundPidArray[backgroundProcessCount] = backgroundspawnpid;
 							backgroundProcessCount++;
-							pid_t actualBackgroundPID = waitpid(backgroundspawnpid, &childExitStatus, WNOHANG);
+							//pid_t actualBackgroundPID = waitpid(backgroundspawnpid, &childExitStatus, WNOHANG);
 							break;
 					}
 				}
@@ -837,6 +866,8 @@ int main(){
 				fflush(stdout);
 			}
 		}
+
+		CheckBackgroundProcesses(&backgroundProcessCount, backgroundPidArray, &backgroundExitStatus);
 
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
