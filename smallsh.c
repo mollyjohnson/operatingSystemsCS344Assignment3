@@ -54,6 +54,8 @@ in the assignment instructions to make sure the output buffers get flushed every
 //just run it as a foreground command)
 int backgroundPossibleGlobal = TRUE;
 int isForegroundForSignalGlobal = FALSE;
+int foregroundChildExitStatusGlobal = 0;
+
 //function declarations:
 int StringMatch(char *string1, char *string2);
 void GetInputString(char *userInputString);
@@ -91,13 +93,16 @@ DESCRIPTION
 */
 void catchSIGINT(int signo){
 	if(isForegroundForSignalGlobal == TRUE){
-		char *message = "SIGINT called and you're in a foreground process, will exit\n";
-		write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
+		//char *message = "SIGINT called and you're in a foreground process, will exit\n";
+		//write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
 		isForegroundForSignalGlobal = FALSE;
+		//exit(signo);
+		kill(getpid(), signo);
+		StatusBuiltIn(signo);
 	}
 	else{ //foreground global var for signal is false
-		char *newMessage = "SIGINT called and you're in a background or parent shell process, ignore signal\n";
-		write(STDOUT_FILENO, newMessage, strlen(newMessage)); fflush(stdout);
+		//char *newMessage = "SIGINT called and you're in a background or parent shell process, ignore signal\n";
+		//write(STDOUT_FILENO, newMessage, strlen(newMessage)); fflush(stdout);
 	}
 }
 
