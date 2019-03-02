@@ -79,6 +79,21 @@ void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
+void catchSIGINT(int signo);
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void catchSIGINT(int signo){
+	char *message = "SIGINT. CTRL-Z to stop.\n";
+	write(STDOUT_FILENO, message, 24);
+	fflush(stdout);
+}
 
 /*
 NAME
@@ -555,7 +570,7 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 	int inputCount = 0;
 	int isOutFile = FALSE;
 	int isInFile = FALSE;
-	int isBackground = FALSE;
+	//int isBackground = FALSE;
 	char *space = " ";
 	char *token;
 
@@ -702,6 +717,11 @@ DESCRIPTION
 
 */
 int main(){
+	struct sigaction SIGINT_action = {0};
+	SIGINT_action.sa_handler = catchSIGINT;
+	sigfillset(&SIGINT_action.sa_mask);
+	sigaction(SIGINT, &SIGINT_action, NULL);
+
 	//exit status for the foreground processes. set to 0 to start w/ by default (so if user calls
 	//status before any foreground processes have been run it's zero). can be changed if a foreground
 	//process encounters errors and needs to exit w/ a non-zero status
