@@ -34,14 +34,14 @@ in the assignment instructions to make sure the output buffers get flushed every
 #include <errno.h>
 
 //constant macro definitions:
-//max values for chars and args were determined by the CS344 assignment3 instructions
-//(max chars is actually 2048 but i added one additional char for the null terminator).
-//(max args is actually 512  but i added one additional arg for the NULL arg req'd to null-terminate
-//an array sent to execvp() so execvp() knows when the end of the array has been reached).
-//(max forks an arbitrary value i created to prevent fork-bombing the server).
+//max values for chars and args were determined by the CS344 assignment3 instructions.
+//max chars is actually 2048 but i added one additional char for the null terminator.
+//max args is actually 512  but i added one additional arg for the NULL arg req'd to null-terminate
+//an array sent to execvp() so execvp() knows when the end of the array has been reached.
+//max forks an arbitrary value i created to prevent fork-bombing the server.
 #define MAX_CHARS 2049
 #define MAX_ARGS 513
-#define MAX_FORKS 200
+#define MAX_FORKS 500
 #define EXIT "exit"
 #define CD "cd"
 #define STATUS "status"
@@ -81,18 +81,24 @@ int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
 void SigintSignalStatusCheck(int childExitStatusIn);
-//void CatchSIGINT(int signo);
 void CatchSIGTSTP(int signo);
 
 /*
 NAME
-
+catchsigtstp
 SYNOPSIS
-
+enters or exits foreground-only mode
 DESCRIPTION
-
+signal handler the parent process uses to catch/handle a SIGTSTP signal. receives the signal number (an int) as a parameter.
+checks if the background mode is currently possible (i.e. if the boolean for background mode possible is true).
+if it is, prints message saying foreground-only mode is being entered. prints message to the user. uses write instead of 
+printf() to make sure signal handler is re-entrant. sets the background possible global boolean to false. if the background
+mode possible boolean was already false, prints a message to the user that they're exiting the foreground-only mode. also
+uses write instead of printf to prevent re-entrancy problems (printf isn't reentrant whereas write is). sets the background
+possible global boolean to true.
 */
 void CatchSIGTSTP(int signo){
+	//
 	if(backgroundPossibleGlobal == TRUE ){
 		char *message = "\nEntering foreground-only mode (& is now ignored)\n: ";
 		write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
@@ -104,29 +110,6 @@ void CatchSIGTSTP(int signo){
 		backgroundPossibleGlobal = TRUE;
 	}
 }
-
-/*
-NAME
-catchsigint
-SYNOPSIS
-custom SIGINT signal handler for parent process
-DESCRIPTION
-signal handler to be used by parent process. catches SIGINT signals and calls the
-built in status function (passing in the signo int, i.e. the signal number that made
-the child terminate itself) so that the terminating signal of the last foreground
-child process can be printed.
-*/
-/*
-void CatchSIGINT(int signo){
-	if(isBackgroundGlobal == FALSE){
-		if(isForegroundGlobal == TRUE){
-			StatusBuiltIn(signo);
-		}
-	}
-	isBackgroundGlobal = FALSE;
-	isForegroundGlobal = FALSE;
-}
-*/
 
 /*
 NAME
