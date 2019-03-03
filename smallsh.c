@@ -53,9 +53,9 @@ in the assignment instructions to make sure the output buffers get flushed every
 //flag for if background is possible (if SIGSTP command given, should ignore "&" and
 //just run it as a foreground command)
 int backgroundPossibleGlobal = TRUE;
-int foregroundChildExitStatusGlobal = 0;
-int isBackgroundGlobal = FALSE;
-int isForegroundGlobal = FALSE;
+//int foregroundChildExitStatusGlobal = 0;
+//int isBackgroundGlobal = FALSE;
+//int isForegroundGlobal = FALSE;
 
 //function declarations:
 int StringMatch(char *string1, char *string2);
@@ -84,6 +84,28 @@ int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
 void SigintSignalStatusCheck(int childExitStatusIn);
 //void CatchSIGINT(int signo);
+void CatchSIGTSTP(int signo);
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void CatchSIGTSTP(int signo){
+	if(backgroundPossibleGlobal == TRUE ){
+		char *message = "\nEntering foregroun-only mode (& is now ignored)\n: ";
+		write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
+		backgroundPossibleGlobal = FALSE;
+	}
+	else{ //backgroundPossibleGlobal is false
+		char *message2 = "\nExiting foreground-only mode\n: ";
+		write(STDOUT_FILENO, message2, strlen(message2)); fflush(stdout);
+		backgroundPossibleGlobal = TRUE;
+	}
+}
 
 /*
 NAME
@@ -745,12 +767,18 @@ DESCRIPTION
 
 */
 int main(){
-	struct sigaction SIGINT_action = {0};
+	struct sigaction SIGINT_action = {{0}};
 	//SIGINT_action.sa_handler = CatchSIGINT;
 	SIGINT_action.sa_handler = SIG_IGN;
 	sigfillset(&SIGINT_action.sa_mask);
 	SIGINT_action.sa_flags = 0; 
 	sigaction(SIGINT, &SIGINT_action, NULL);
+
+	struct sigaction SIGTSTP_action = {{0}};
+	SIGTSTP_action.sa_handler = CatchSIGTSTP;
+	sigfillset(&SIGTSTP_action.sa_mask);
+	SIGTSTP_action.sa_flags = 0;
+	sigaction(SIGTSTP, &SIGTSTP_action, NULL);
 
 	//exit status for the foreground processes. set to 0 to start w/ by default (so if user calls
 	//status before any foreground processes have been run it's zero). can be changed if a foreground
@@ -837,6 +865,8 @@ int main(){
 						case 0: //i am the child
 							SIGINT_action.sa_handler = SIG_IGN;
 							sigaction(SIGINT, &SIGINT_action, NULL);
+							SIGTSTP_action.sa_handler = SIG_IGN;
+							sigaction(SIGTSTP, &SIGTSTP_action, NULL);
 							//printf("i am the background child!\n"); fflush(stdout);
 
 							//printf("background child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
@@ -869,7 +899,7 @@ int main(){
 							//printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
 							//sleep(3);
 							//printf("parent (%d): waiting for child (%d) to terminate\n", getpid(), backgroundspawnpid); fflush(stdout);
-							isBackgroundGlobal = TRUE;
+							//isBackgroundGlobal = TRUE;
 							backgroundPidArray[backgroundProcessCount] = backgroundspawnpid;
 							printf("background pid is %d\n", backgroundspawnpid); fflush(stdout);
 							backgroundProcessCount++;
@@ -898,6 +928,8 @@ int main(){
 						case 0: //i am the child
 							SIGINT_action.sa_handler = SIG_DFL;
 							sigaction(SIGINT, &SIGINT_action, NULL);
+							SIGTSTP_action.sa_handler = SIG_IGN;
+							sigaction(SIGTSTP, &SIGTSTP_action, NULL);
 
 							//printf("i am the child!\n"); fflush(stdout);
 							//printf("child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
@@ -925,7 +957,7 @@ int main(){
 							//printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
 							//sleep(3);
 							//printf("parent (%d): waiting for child(%d) to terminate\n", getpid(), spawnpid); fflush(stdout);
-							isForegroundGlobal = TRUE;
+							//isForegroundGlobal = TRUE;
 							foregroundPidArray[foregroundProcessCount] = spawnpid;
 							foregroundProcessCount++;
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
