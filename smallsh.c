@@ -50,12 +50,10 @@ in the assignment instructions to make sure the output buffers get flushed every
 #define NO_ACTION "NO_ACTION"
 
 //global variables:
-//flag for if background is possible (if SIGSTP command given, should ignore "&" and
-//just run it as a foreground command)
+//flag for if background is possible (if SIGTSTP command given, should ignore "&" and
+//just run it as a foreground command). set to true by default so initially background
+//mode is possible until the user enters ctrl-Z.
 int backgroundPossibleGlobal = TRUE;
-//int foregroundChildExitStatusGlobal = 0;
-//int isBackgroundGlobal = FALSE;
-//int isForegroundGlobal = FALSE;
 
 //function declarations:
 int StringMatch(char *string1, char *string2);
@@ -962,7 +960,9 @@ int main(){
 							foregroundProcessCount++;
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
 							//printf("parent (%d): child(%d) terminated, exiting!\n", getpid(), actualPID); fflush(stdout);
-							SigintSignalStatusCheck(childExitStatus);
+							
+							//SigintSignalStatusCheck(childExitStatus);
+							StatusBuiltIn(childExitStatus);
 							break;
 					}
 				}
