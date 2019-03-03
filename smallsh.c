@@ -96,7 +96,7 @@ DESCRIPTION
 */
 void CatchSIGTSTP(int signo){
 	if(backgroundPossibleGlobal == TRUE ){
-		char *message = "\nEntering foregroun-only mode (& is now ignored)\n: ";
+		char *message = "\nEntering foreground-only mode (& is now ignored)\n: ";
 		write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
 		backgroundPossibleGlobal = FALSE;
 	}
