@@ -808,7 +808,7 @@ int main(){
 						case 0: //i am the child
 							//printf("i am the background child!\n"); fflush(stdout);
 							//printf("background child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
-							sleep(2);
+							//sleep(2);
 							//printf("background pid is %d\n", getpid()); fflush(stdout);
 							if(NeedsInputRedirect(inputFile) == TRUE){
 								//printf("background input file is gonna be redirected!\n"); fflush(stdout);
@@ -835,7 +835,7 @@ int main(){
 						default: //i am the parent
 							//printf("i am the parent!\n"); fflush(stdout);
 							//printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
-							sleep(3);
+							//sleep(3);
 							//printf("parent (%d): waiting for child (%d) to terminate\n", getpid(), backgroundspawnpid); fflush(stdout);
 							backgroundPidArray[backgroundProcessCount] = backgroundspawnpid;
 							printf("background pid is %d\n", backgroundspawnpid); fflush(stdout);
