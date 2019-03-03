@@ -91,8 +91,9 @@ DESCRIPTION
 
 */
 void CatchSIGINT(int signo){
-	char *message = "SIGINT called and you're using the signal handler\n";
-	write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
+	//char *message = "SIGINT called and you're using the signal handler\n";
+	//write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
+	StatusBuiltIn(signo);
 }
 
 /*
