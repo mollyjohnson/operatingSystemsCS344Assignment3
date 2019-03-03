@@ -54,6 +54,8 @@ in the assignment instructions to make sure the output buffers get flushed every
 //just run it as a foreground command)
 int backgroundPossibleGlobal = TRUE;
 int foregroundChildExitStatusGlobal = 0;
+int isBackgroundGlobal = FALSE;
+int isForegroundGlobal = FALSE;
 
 //function declarations:
 int StringMatch(char *string1, char *string2);
@@ -94,7 +96,13 @@ the child terminate itself) so that the terminating signal of the last foregroun
 child process can be printed.
 */
 void CatchSIGINT(int signo){
-	StatusBuiltIn(signo);
+	if(isBackgroundGlobal == FALSE){
+		if(isForegroundGlobal == TRUE){
+			StatusBuiltIn(signo);
+		}
+	}
+	isBackgroundGlobal = FALSE;
+	isForegroundGlobal = FALSE;
 }
 
 /*
@@ -719,11 +727,11 @@ DESCRIPTION
 
 */
 int main(){
-	struct sigaction SIGINT_action = {{0}};
-	SIGINT_action.sa_handler = CatchSIGINT;
-	//SIGINT_action.sa_handler = SIG_IGN;
+	struct sigaction SIGINT_action = {0};
+	//SIGINT_action.sa_handler = CatchSIGINT;
+	SIGINT_action.sa_handler = SIG_IGN;
 	sigfillset(&SIGINT_action.sa_mask);
-	SIGINT_action.sa_flags = 0;
+	SIGINT_action.sa_flags = 0; 
 	sigaction(SIGINT, &SIGINT_action, NULL);
 
 	//exit status for the foreground processes. set to 0 to start w/ by default (so if user calls
@@ -810,6 +818,7 @@ int main(){
 							break;
 						case 0: //i am the child
 							SIGINT_action.sa_handler = SIG_IGN;
+							sigaction(SIGINT, &SIGINT_action, NULL);
 							//printf("i am the background child!\n"); fflush(stdout);
 
 							//printf("background child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
@@ -842,6 +851,7 @@ int main(){
 							//printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
 							//sleep(3);
 							//printf("parent (%d): waiting for child (%d) to terminate\n", getpid(), backgroundspawnpid); fflush(stdout);
+							isBackgroundGlobal = TRUE;
 							backgroundPidArray[backgroundProcessCount] = backgroundspawnpid;
 							printf("background pid is %d\n", backgroundspawnpid); fflush(stdout);
 							backgroundProcessCount++;
@@ -869,6 +879,7 @@ int main(){
 							break;
 						case 0: //i am the child
 							SIGINT_action.sa_handler = SIG_DFL;
+							sigaction(SIGINT, &SIGINT_action, NULL);
 
 							//printf("i am the child!\n"); fflush(stdout);
 							//printf("child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
@@ -896,6 +907,7 @@ int main(){
 							//printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
 							//sleep(3);
 							//printf("parent (%d): waiting for child(%d) to terminate\n", getpid(), spawnpid); fflush(stdout);
+							isForegroundGlobal = TRUE;
 							foregroundPidArray[foregroundProcessCount] = spawnpid;
 							foregroundProcessCount++;
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
