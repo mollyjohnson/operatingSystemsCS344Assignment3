@@ -52,7 +52,9 @@ in the assignment instructions to make sure the output buffers get flushed every
 //global variables:
 //flag for if background is possible (if SIGTSTP command given, should ignore "&" and
 //just run it as a foreground command). set to true by default so initially background
-//mode is possible until the user enters ctrl-Z.
+//mode is possible until the user enters ctrl-Z. used as a global variable since can't
+//pass in additional parameters into the signal handler function. (and was the recommended
+//method on the piazza discussion board).
 int backgroundPossibleGlobal = TRUE;
 
 //function declarations:
@@ -98,15 +100,28 @@ uses write instead of printf to prevent re-entrancy problems (printf isn't reent
 possible global boolean to true.
 */
 void CatchSIGTSTP(int signo){
-	//
+	//check if the background mode is currently possible (i.e. if backgroundPossibleGlobal is true)
 	if(backgroundPossibleGlobal == TRUE ){
+		//if was true, print message to user that they're entering the foreground-only mode
 		char *message = "\nEntering foreground-only mode (& is now ignored)\n: ";
+		
+		//use write() instead of printf() to print the message since write() is re-entrant.
+		//lectures state strlen() isn't re-entrant, but students/instructors on the piazza 
+		//discussion board found that recently it became a re-entrant function and could thus
+		//be used for this assignment.
 		write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
+
+		//set the background possible global variable to false to enter foreground-only mode
 		backgroundPossibleGlobal = FALSE;
 	}
 	else{ //backgroundPossibleGlobal is false
+		//if was false, print message to the user that they're exiting the foreground-only mode
 		char *message2 = "\nExiting foreground-only mode\n: ";
+
+		//again use write instead of printf due to re-entrancy
 		write(STDOUT_FILENO, message2, strlen(message2)); fflush(stdout);
+
+		//set the background possible global variable to true to exit foreground-only mode
 		backgroundPossibleGlobal = TRUE;
 	}
 }
