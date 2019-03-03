@@ -80,7 +80,7 @@ void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
-void catchSIGINT(int signo);
+void CatchSIGINT(int signo);
 
 /*
 NAME
@@ -90,7 +90,7 @@ SYNOPSIS
 DESCRIPTION
 
 */
-void catchSIGINT(int signo){
+void CatchSIGINT(int signo){
 	char *message = "SIGINT called and you're using the signal handler\n";
 	write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
 }
@@ -718,7 +718,7 @@ DESCRIPTION
 */
 int main(){
 	struct sigaction SIGINT_action = {{0}};
-	SIGINT_action.sa_handler = catchSIGINT;
+	SIGINT_action.sa_handler = CatchSIGINT;
 	sigfillset(&SIGINT_action.sa_mask);
 	SIGINT_action.sa_flags = 0;
 	sigaction(SIGINT, &SIGINT_action, NULL);
