@@ -22,8 +22,8 @@ smallsh: smallsh.c
 clean:
 	rm -f smallsh
 
-#command to remove smallsh executable as well as any "out" or "junk" files
-#if user enters make cleanall.
+#command to remove smallsh executable as well as any "out", "junk", or
+#"mytestresults" files if user enters make cleanall.
 #-f means don't ask if the file should be deleted, just delete it
 cleanall:
-	rm -f smallsh out* junk*
+	rm -f smallsh out* junk* mytestresults*
