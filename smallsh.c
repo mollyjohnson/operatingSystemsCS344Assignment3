@@ -53,7 +53,6 @@ in the assignment instructions to make sure the output buffers get flushed every
 //flag for if background is possible (if SIGSTP command given, should ignore "&" and
 //just run it as a foreground command)
 int backgroundPossibleGlobal = TRUE;
-int isForegroundForSignalGlobal = FALSE;
 int foregroundChildExitStatusGlobal = 0;
 
 //function declarations:
@@ -92,18 +91,8 @@ DESCRIPTION
 
 */
 void catchSIGINT(int signo){
-	if(isForegroundForSignalGlobal == TRUE){
-		//char *message = "SIGINT called and you're in a foreground process, will exit\n";
-		//write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
-		isForegroundForSignalGlobal = FALSE;
-		//exit(signo);
-		kill(getpid(), signo);
-		//StatusBuiltIn(signo);
-	}
-	else{ //foreground global var for signal is false
-		//char *newMessage = "SIGINT called and you're in a background or parent shell process, ignore signal\n";
-		//write(STDOUT_FILENO, newMessage, strlen(newMessage)); fflush(stdout);
-	}
+	char *message = "SIGINT called and you're using the signal handler\n";
+	write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
 }
 
 /*
@@ -728,9 +717,10 @@ DESCRIPTION
 
 */
 int main(){
-	struct sigaction SIGINT_action = {0};
+	struct sigaction SIGINT_action = {{0}};
 	SIGINT_action.sa_handler = catchSIGINT;
 	sigfillset(&SIGINT_action.sa_mask);
+	SIGINT_action.sa_flags = 0;
 	sigaction(SIGINT, &SIGINT_action, NULL);
 
 	//exit status for the foreground processes. set to 0 to start w/ by default (so if user calls
@@ -873,10 +863,12 @@ int main(){
 							perror("Hull Breach!"); exit(1); //error, no child process created
 							break;
 						case 0: //i am the child
-							isForegroundForSignalGlobal = TRUE;
+							printf("about to reset signal handler to SIG_DFL\n"); fflush(stdout);
+							SIGINT_action.sa_handler = SIG_DFL;
+
 							//printf("i am the child!\n"); fflush(stdout);
 							//printf("child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
-							sleep(2);
+							//sleep(2);
 							//printf("child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
 							if(NeedsInputRedirect(inputFile) == TRUE){
 								//printf("foreground input file is gonna be redirected!\n");fflush(stdout);
@@ -894,13 +886,11 @@ int main(){
 								}
 							}
 							Execute(parsedUserInput, &childExitStatus);
-
 							break;
 						default: //i am the parent
-							isForegroundForSignalGlobal = FALSE;
 							//printf("i am the parent!\n"); fflush(stdout);
 							//printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
-							sleep(3);
+							//sleep(3);
 							//printf("parent (%d): waiting for child(%d) to terminate\n", getpid(), spawnpid); fflush(stdout);
 							foregroundPidArray[foregroundProcessCount] = spawnpid;
 							foregroundProcessCount++;
