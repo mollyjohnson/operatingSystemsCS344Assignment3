@@ -98,7 +98,7 @@ void catchSIGINT(int signo){
 		isForegroundForSignalGlobal = FALSE;
 		//exit(signo);
 		kill(getpid(), signo);
-		StatusBuiltIn(signo);
+		//StatusBuiltIn(signo);
 	}
 	else{ //foreground global var for signal is false
 		//char *newMessage = "SIGINT called and you're in a background or parent shell process, ignore signal\n";
