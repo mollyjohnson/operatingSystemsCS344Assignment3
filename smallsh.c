@@ -84,15 +84,16 @@ void CatchSIGINT(int signo);
 
 /*
 NAME
-
+catchsigint
 SYNOPSIS
-
+custom SIGINT signal handler for parent process
 DESCRIPTION
-
+signal handler to be used by parent process. catches SIGINT signals and calls the
+built in status function (passing in the signo int, i.e. the signal number that made
+the child terminate itself) so that the terminating signal of the last foreground
+child process can be printed.
 */
 void CatchSIGINT(int signo){
-	//char *message = "SIGINT called and you're using the signal handler\n";
-	//write(STDOUT_FILENO, message, strlen(message)); fflush(stdout);
 	StatusBuiltIn(signo);
 }
 
