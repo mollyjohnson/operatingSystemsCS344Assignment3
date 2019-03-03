@@ -82,7 +82,7 @@ void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
-void CatchSIGINT(int signo);
+//void CatchSIGINT(int signo);
 
 /*
 NAME
@@ -95,6 +95,7 @@ built in status function (passing in the signo int, i.e. the signal number that 
 the child terminate itself) so that the terminating signal of the last foreground
 child process can be printed.
 */
+/*
 void CatchSIGINT(int signo){
 	if(isBackgroundGlobal == FALSE){
 		if(isForegroundGlobal == TRUE){
@@ -104,6 +105,7 @@ void CatchSIGINT(int signo){
 	isBackgroundGlobal = FALSE;
 	isForegroundGlobal = FALSE;
 }
+*/
 
 /*
 NAME
