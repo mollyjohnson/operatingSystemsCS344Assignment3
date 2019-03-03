@@ -719,6 +719,7 @@ DESCRIPTION
 int main(){
 	struct sigaction SIGINT_action = {{0}};
 	SIGINT_action.sa_handler = CatchSIGINT;
+	//SIGINT_action.sa_handler = SIG_IGN;
 	sigfillset(&SIGINT_action.sa_mask);
 	SIGINT_action.sa_flags = 0;
 	sigaction(SIGINT, &SIGINT_action, NULL);
@@ -806,7 +807,9 @@ int main(){
 							perror("Hull Breach!"); exit(1); //error, no child process created
 							break;
 						case 0: //i am the child
+							SIGINT_action.sa_handler = SIG_IGN;
 							//printf("i am the background child!\n"); fflush(stdout);
+
 							//printf("background child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
 							//sleep(2);
 							//printf("background pid is %d\n", getpid()); fflush(stdout);
@@ -863,7 +866,6 @@ int main(){
 							perror("Hull Breach!"); exit(1); //error, no child process created
 							break;
 						case 0: //i am the child
-							printf("about to reset signal handler to SIG_DFL\n"); fflush(stdout);
 							SIGINT_action.sa_handler = SIG_DFL;
 
 							//printf("i am the child!\n"); fflush(stdout);
