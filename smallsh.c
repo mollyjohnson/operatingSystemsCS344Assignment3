@@ -82,6 +82,7 @@ void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
+void SigintSignalStatusCheck(int childExitStatusIn);
 //void CatchSIGINT(int signo);
 
 /*
@@ -106,6 +107,21 @@ void CatchSIGINT(int signo){
 	isForegroundGlobal = FALSE;
 }
 */
+
+/*
+NAME
+
+SYNOPSIS
+
+DESCRIPTION
+
+*/
+void SigintSignalStatusCheck(int childExitStatusIn){
+	if(WIFSIGNALED(childExitStatusIn) != 0){
+		int termSig = WTERMSIG(childExitStatusIn);
+		printf("terminated by signal %d\n", termSig); fflush(stdout);
+	}
+}
 
 /*
 NAME
@@ -914,6 +930,7 @@ int main(){
 							foregroundProcessCount++;
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
 							//printf("parent (%d): child(%d) terminated, exiting!\n", getpid(), actualPID); fflush(stdout);
+							SigintSignalStatusCheck(childExitStatus);
 							break;
 					}
 				}
