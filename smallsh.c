@@ -439,18 +439,35 @@ void StatusBuiltIn(int childExitStatusIn){
 
 /*
 NAME
-
+execute
 SYNOPSIS
-
+calls execvp() on commands that aren't built-ins
 DESCRIPTION
-
+takes in an array of strings (a non-buil-in command and either no arguments or up to 512 arguments (as listed 
+in assignment specs). calls execvp(), which is an exec() function variant that uses the path variable to look
+for non-built-in commands and requires the path start (i.e. pointer to the array of string inputs) as the first argument, 
+and the array itself as the second argument.  (Note: the array must be null-terminated in order for execvp() to know
+when the end of the array has been reached!). if execvp() encounters an error, set the exit status to a non-zero
+value and call exit with this value. returns void.
 */
 void Execute(char **parsedInput, int *childExitStatusIn){
+	//execvp() use also adapted from:
+	////https://stackoverflow.com/questions/27541910/how-to-use-execvp and
+	//http://www.csl.mtu.edu/cs4411.ck/www/NOTES/process/fork/exec.html and
+	//http://www.cs.ecu.edu/karl/4630/sum01/example1.html and
+	//http://man7.org/linux/man-pages/man3/exec.3.html
+	
+	//call execvp() with the parsed input array pointer as the path (first arg) and the parsed input array
+	//itself as the second arg. parsed input is a NULL-terminated array. check if execvp returns < 0 (which
+	//would indicate an execvp() error).
 	if(execvp(parsedInput[0], parsedInput) < 0){
-		//perror("Failure with execvp()! Command could not be executed. Exit status will be set to 1.\n");
+		//if execvp had an error, print an error message to the user
 		printf("%s: no such file or directory\n", parsedInput[0]); fflush(stdout);
+
+		//set the exit value to non-zero
 		*childExitStatusIn = 1;
-		//printf("child exit exec error status is: %d\n", *childExitStatusIn); fflush(stdout); 
+
+		//exit with the non-zero exit value
 		exit(*childExitStatusIn);
 	}
 }
