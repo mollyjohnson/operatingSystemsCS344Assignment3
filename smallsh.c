@@ -242,14 +242,21 @@ void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidAr
 
 /*
 NAME
-
+redirectinputfile
 SYNOPSIS
-
+redirects stdin to a specified input file
 DESCRIPTION
-
+takes in the input file name as a parameter. opens the file. if not able to open,
+sets exit status to a non-zero number and prints a message to the user.
+if able to be opened, uses dup2 to redirect stdin(0) to the source file descriptor.
+checks for dup2 error and if there's an error also sets the exit value to a non-zero
+number. returns the child exit status integer (0 if successful, non-zero if are errors).
 */
 int RedirectInputFile(char *inputFileIn){
+	//create temporary child exit status variable, set to 0 by default
 	int childExitStat = 0;
+
+	//set source file descriptor, open the input file (read only)
 	int sourceFD = open(inputFileIn, O_RDONLY);
 	if(sourceFD == -1){
 		//printf("source open() error\n"); fflush(stdout);
