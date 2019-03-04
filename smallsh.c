@@ -184,24 +184,56 @@ the status for each pid is available (0 = process terminated) or if the status i
 WNOHANG option will allow the waitpid function to return immediately whether the process being checked has
 terminated yet or not. if a background process has completed (terminated or exited), will print a message to
 the user stating which background pid is done and then call the status built in function to get either the
-exit value or terminating signal for that background process pid.
+exit value or terminating signal for that background process pid. returns void.
 */
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd){
+	//check that there are 1 or more background processes that haven't yet exited/been terminated
 	if(*backgroundProcessCountIn > 0){
+		//had trouble with waitpid expecting an int not a pointer to an int, so set a temporary
+		//background status int to the background child exit status that was passed in
 		int backgroundStatTemp = *childExitStatusBckd; 
+
+		//loop through all background processes not yet exited/terminated
 		for(int k = 0; k < *backgroundProcessCountIn; k++){
+			//also had trouble passing in the array element to waitpid so set a temporary background spawnpid 
+			//to the pid in the current array position.
 			pid_t backgroundSpawnPid = backgroundPidArrayIn[k];
+
+			//use waitpid to get the status of the current background process pid. pass in the temp background
+			//spawnpid, temp background exit status(so it'll be changed to the correct status by the waitpid
+			//function), and the WNOHANG option (which will cause waitpid to return immediately whether the process
+			//has exited/been terminated or not, as we don't want to be waiting on background processes if they're
+			//not done, we should be just returning control to the command line and checking periodically for
+			//if they're done).
 			pid_t actualBackgroundPID = waitpid(backgroundSpawnPid, &backgroundStatTemp, WNOHANG);
+
+			//set the background status that was passed in to the value of the temp background status variable
 			*childExitStatusBckd = backgroundStatTemp;
+
+			//if waitpid returned  -1, an error occurred. print error message and exit w non-zero value.
 			if(actualBackgroundPID == -1){
 				perror("waitpid for background process error!\n"); exit(1);
 			}
-			else if(actualBackgroundPID != 0){ //0 means status for the pid not available, 0 means child process terminated
+
+			//if waitpid returned a non-zero value (but not -1), means child process terminated. (return of 0 means
+			//the status for the pid is not yet available. in that case, will do nothing).
+			else if(actualBackgroundPID != 0){
+				//if child process terminated, print message to the user that that background pid is done. 
 				printf("background pid %d is done: ", actualBackgroundPID); fflush(stdout);
+
+				//loop through all but the last background pid (starting from the position of the pid that was found
+				//to be terminated/exited)
 				for(int i = k; i < *backgroundProcessCountIn - 1; i++){
+					//shift all background pids over to the left one from that point to prevent pids that have already
+					//been terminated/exited from being in the array
 					backgroundPidArrayIn[i] = backgroundPidArrayIn[i + 1];					
 				}
+				//use the status background built in function to get either the exit value or the terminating signal for
+				//the background process that was just terminated or exited.
 				StatusBuiltInBackground(backgroundStatTemp);
+
+				//decrease the background process count by one (since shifted all remaining pids so that the array length
+				//is one less than before and the exited/terminated pid has been removed)
 				(*backgroundProcessCountIn) = ((*backgroundProcessCountIn) - 1);
 			}
 		}
@@ -967,6 +999,9 @@ int main(){
 							foregroundPidArray[foregroundProcessCount] = spawnpid;
 							foregroundProcessCount++;
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
+							if(actualPID == -1){
+								perror("waitpid for background process error!\n"); exit(1);
+							}	
 							//printf("parent (%d): child(%d) terminated, exiting!\n", getpid(), actualPID); fflush(stdout);
 							
 							//SigintSignalStatusCheck(childExitStatus);
