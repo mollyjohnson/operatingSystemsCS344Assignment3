@@ -256,19 +256,26 @@ int RedirectInputFile(char *inputFileIn){
 	//create temporary child exit status variable, set to 0 by default
 	int childExitStat = 0;
 
-	//set source file descriptor, open the input file (read only)
+	//set source file descriptor to value returned by open, open the input file (read only)
 	int sourceFD = open(inputFileIn, O_RDONLY);
+
+	//if open returned -1, was an error opening the file. set exit status to 1 and print
+	//error message to the user.
 	if(sourceFD == -1){
-		//printf("source open() error\n"); fflush(stdout);
 		childExitStat = 1;
 		printf("cannot open %s for input\n", inputFileIn); fflush(stdout);	
 	}
-	//printf("sourceFD = %d\n", sourceFD); fflush(stdout); 
+
+	//set dupresult to the value returned by dup2. pass in the source file descriptor and the
+	//stdinn value (which is 0) to redirect input from stdin to the source file descriptor.
 	int dupResult = dup2(sourceFD, 0);
+
+	//if dup2 returns -1, the redirect had an error. set exit status to 1.
 	if(dupResult == -1){
-		//printf("source dup2() error\n"); fflush(stdout);
 		childExitStat = 1;
 	}
+
+	//return the child exit status
 	return childExitStat;
 }
 
