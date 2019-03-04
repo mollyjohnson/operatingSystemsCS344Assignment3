@@ -1140,26 +1140,69 @@ number of background processes and keeps their pids in an array, forks children 
 forks background and foreground child processes. receives no parameters. returns an int. 
 */
 int main(){
+	//additional sigaction information adapted from:
+	//http://www.tutorialspoint.com/unix_system_calls/sigaction.htm and
+	//http://man7.org/linux/man-pages/man2/sigaction.2.html and
+	//https://web.mst.edu/~ercal/284/SignalExamples/sigaction-EX1.c
+	
+	//set up SIGINT struct and signal handler:
+	
+	//initialize sigaction struct to empty {0}. double braces used to prevent warning errors
+	//from the gcc compiler.
 	struct sigaction SIGINT_action = {{0}};
-	//SIGINT_action.sa_handler = CatchSIGINT;
+
+	//instead of passing a function pointer, since we want the parent to ignore the SIGINT signal,
+	//set the signal handler to SIG_IGN (i.e. signal ignore, so the parent process will ignore the SIGINT signal).
 	SIGINT_action.sa_handler = SIG_IGN;
+
+	//block/delay all signals arriving while this mask is in place
 	sigfillset(&SIGINT_action.sa_mask);
+
+	//set flags to zero (not using SA_RESTART because in my getline i use the other option listed in
+	//the lecture notes, checking if getline returns -1 and if so continuing to loop for input, only
+	//breaking out of the getline input loop when getline != -1).
 	SIGINT_action.sa_flags = 0; 
+
+	//specify an alternative signal handler function to be called (but it won't be used since
+	//the SA_SIGINFO flag isn't set in sa_flags)
 	sigaction(SIGINT, &SIGINT_action, NULL);
 
+
+	//set up SIGTSTP struct and signal handler:
+
+	//initialize sigaction struct to empty {0}. double braces used to prevent warning errors
+	//from the gcc compiler.
 	struct sigaction SIGTSTP_action = {{0}};
+
+	//pass function pointer to the function CatchSIGTSTP, which will be the custom signal handler
+	//function written by me.
 	SIGTSTP_action.sa_handler = CatchSIGTSTP;
+
+	//block/delay all signals arriving while this mask is in place
 	sigfillset(&SIGTSTP_action.sa_mask);
+
+	//set flags to zero (again, not using SA_RESTART because in my getline i use the other option listed in
+	//the lecture notes, checking if getline returns -1 and if so continuing to loop for input, only
+	//breaking out of the getline input loop when getline != -1) 
 	SIGTSTP_action.sa_flags = 0;
+
+	//specify an alternative signal handler function to be called (but it won't be used since
+	//the SA_SIGINFO flag isn't set in sa_flags)
 	sigaction(SIGTSTP, &SIGTSTP_action, NULL);
 
-	//exit status for the foreground processes. set to 0 to start w/ by default (so if user calls
+	//exit status for the foreground and background processes. set to 0 to start w/ by default (so if user calls
 	//status before any foreground processes have been run it's zero). can be changed if a foreground
-	//process encounters errors and needs to exit w/ a non-zero status
+	//process encounters errors and needs to exit w/ a non-zero status or if a foreground process
+	//is terminated by a signal. can also be changed if a background process encounters errors
+	//and needs to exit w/ a non-zero status or if it's terminated by a signal.
 	int childExitStatus = 0;
 	int backgroundExitStatus = 0;
+
+	//process counter(used to perform periodic check on any background processes not yet exited or terminated by a signal)
 	int foregroundProcessCount = 0;
 	int backgroundProcessCount = 0;
+
+	//fork counter (used to prevent fork bombs)
 	int forkCount = 0;
 
 	//Instructor brewster on osu cs 344 slack message board stated this kind of fixed array to store
@@ -1167,123 +1210,173 @@ int main(){
 	int backgroundPidArray[1000];
 	int foregroundPidArray[1000];
 
-	//get user input as long as the user hasn't entered "exit"
+	//create fixed character array to get the command (using this here because otherwise the user input received
+	//in the do-while loop won't persist beyond the loop and thus can't be checked in the do-while conditional for
+	//if the user has entered exit).
 	char command[MAX_CHARS];
+	
+	//get user input as long as the user hasn't entered "exit"
 	do{
+		//create string for input file name of max chars, memset to null terminators. initialize to "NO_ACTION" (can be changed
+		//later if the user actually enters an input file name)
 		char inputFile[MAX_CHARS];
 		memset(inputFile, '\0', sizeof(inputFile));
 		strcpy(inputFile, NO_ACTION);
 
+		//create string for output file name of max chars, memset to null terminators. initialize to "NO_ACTION" (can be
+		//changed later if the user actually enters an output file name)
 		char outputFile[MAX_CHARS];
 		memset(outputFile, '\0', sizeof(outputFile));
 		strcpy(outputFile, NO_ACTION);
 
+		//create bool variable to determine if the current process has been requested to be in the background or not (should get
+		//tripped even if the foreground-only mode is on). initialize to false, can be changed later if the last arg of the user
+		//input is "&", which would mean the user requested the process to run in background mode and thus isBackground should be TRUE;
 		int isBackground = FALSE;
 
+		//create and memset with null terminators a string of MAX_CHARS length to hold the user's input. (don't set to NO_ACTION because
+		//the user will have input for some kind here, unlike w the input/output files or background request, which are optional).
 		char userInputStr[MAX_CHARS];
 		memset(userInputStr, '\0', sizeof(userInputStr));
 
+		//create the array of strings for parsed user input and malloc it
 		char **parsedUserInput= malloc((MAX_ARGS) * sizeof(char*));
+
+		//check that the malloc was successful. if not (== NULL), print error message to user and exit w a non-zero status
 		if(parsedUserInput == NULL){
 			perror("USER INPUT MALLOC ERROR\n");
 			exit(1);
 		}
 
+		//print the command prompt to the user
 		printf(": "); fflush(stdout);
 
+		//call GetInputString to get the long input string from the user (using getline in the GetInputString function)
 		GetInputString(userInputStr);
 
+		//create and set the number of inputs to the number returned by the GetArgs function. Call the GetArgs function
+		//to parse the arguments into user input command/args (put into the parsed user input array of strings), input file
+		//for redirection (optional), output file for redirection (optional), and background toggle (optional)
 		int numInputs = GetArgs(parsedUserInput, userInputStr, inputFile, outputFile, &isBackground);
 
+		//if the user entered "exit", call the built in exit function
 		if(IsExit(parsedUserInput[0]) == TRUE){
-			//printf("user entered exit\n"); fflush(stdout);
 			ExitBuiltIn(foregroundProcessCount, backgroundProcessCount, backgroundPidArray, foregroundPidArray, childExitStatus);
 		}
+		//else if the user entered "status", call the built in status function
 		else if(IsStatus(parsedUserInput[0]) == TRUE){
-			//printf("user entered status\n"); fflush(stdout); 
 			StatusBuiltIn(childExitStatus);
 		}
+		//else if the user entered "cd", check the number of inputs
 		else if(IsChangeDir(parsedUserInput[0]) == TRUE){
+			//if the user entered "cd" and the num of inputs was 1, means user only entered "cd", call ChangeDirBuiltInNoArgs
 			if(numInputs == 1){
-				//printf("user entered change dir w no args\n"); fflush(stdout); 
 				ChangeDirBuiltInNoArgs();
 			}
+			//else if the user entered "cd" and the num of inputs was > 1, means user entered cd plus one or more args,
+			//call ChangeDirBuiltInOneArg with the first argument given by the user (even if user entered many args, only
+			//use the first one as their desired file path, ignore any following args)
 			else if(numInputs > 1){
-				//printf("user entered change dir w >= 1 arg\n"); fflush(stdout); 
-				//printf("cd arg is: %s\n", parsedUserInput[1]); fflush(stdout); 
 				ChangeDirBuiltInOneArg(parsedUserInput[1]);
 			}
 		}
+		//else if the user entered a comment, blank line of spaces, or a blank line of just one newline char, do nothing so user
+		//just gets back to command prompt and can put in new input
 		else if(IsNoAction(parsedUserInput[0]) == TRUE){
-			//printf("no action should be taken\n"); fflush(stdout); 
 		}
+		//else the user entered a non-built in command that will need to be execvp()'d
 		else{
-			//printf("user entered a non-built in\n"); fflush(stdout); 
-
-			//make the array NULL-terminated for execvp() so it knows where the end
-			//of the array is
+			//make sure the array to be used for execvp() is NULL-terminated so execvp() knows where the end
+			//of the array is!!!!!
 			parsedUserInput[numInputs] = NULL;
 
 			//if user indicated to run the process in the background AND background
-			//mode is currently allowed
+			//mode is currently allowed (i.e. user is NOT currently in foreground-only mode)
 			if((isBackground == TRUE) && (backgroundPossibleGlobal == TRUE)){
-				//printf("user wants background mode & it's allowed\n"); fflush(stdout);
+				//create backgroundspawnpid and set to an impossible value (pids will never be negative numbers)
 				pid_t backgroundspawnpid = -5;
+
+				//check the fork count to prevent fork bombing
 				if(forkCount < MAX_FORKS){
+
+					//call fork() to create a background child process
 					backgroundspawnpid = fork();
 					switch(backgroundspawnpid){
-						case -1:
-							perror("Hull Breach!"); exit(1); //error, no child process created
+						case -1: //error
+							//if fork returns -1, was an error, no child process created. print message and exit w non-zero value
+							perror("Hull Breach!"); exit(1);
 							break;
 						case 0: //i am the child
-							SIGINT_action.sa_handler = SIG_IGN;
-							sigaction(SIGINT, &SIGINT_action, NULL);
-							SIGTSTP_action.sa_handler = SIG_IGN;
-							sigaction(SIGTSTP, &SIGTSTP_action, NULL);
-							//printf("i am the background child!\n"); fflush(stdout);
+							//if fork returns 0, are in the child process now.
 
-							//printf("background child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
-							//sleep(2);
-							//printf("background pid is %d\n", getpid()); fflush(stdout);
+							//set the SIGINT_action.sa_handler to SIG_IGN (only SIG_IGN and SIG_DFL can persist through exec calls).
+							//this will cause the background process to ignore any SIGINT (ctrl-C) signals and continue running.
+							//SIG_IGN = ignore signal, SIG_DFL = respond to signals with default actions
+							SIGINT_action.sa_handler = SIG_IGN;
+
+							//set sigaction too (tried just setting the handler to SIG_IGN, but the signal didn't get ignored properly until
+							//i added the sigaction alternative signal handler part even though the sa_handler is being used and not sa_sigaction)
+							sigaction(SIGINT, &SIGINT_action, NULL);
+
+							//set the SIGTSTP.sa_handler to SIG_IGN (only SIG_IGN and SIG_DFL can persist through exec calls).
+							//this will cause the background process to ignore any SIGINT signals and continue running.
+							SIGTSTP_action.sa_handler = SIG_IGN;
+							
+							//set sigaction too (tried just setting the handler to SIG_IGN, but the signal didn't get ignored properly until
+							//i added the sigaction alternative signal handler part even though the sa_handler is being used and not sa_sigaction)
+							sigaction(SIGTSTP, &SIGTSTP_action, NULL);
+							
+							//check if the background process needs input file redirection
 							if(NeedsInputRedirect(inputFile) == TRUE){
-								//printf("background input file is gonna be redirected!\n"); fflush(stdout);
+								//if it does need redirection, redirect stdin to the input file using the RedirectInputFile function.
+								//check if redirect failed (will return 1 if it failed).
 								if(RedirectInputFile(inputFile) == 1){
+									//if redirect input failed, set child exit status to 1 and exit w this exit status
 									childExitStatus = 1;
 									exit(childExitStatus);
 								}
 							}
+							//else if the user did not enter any input redirect file, redirect input to /dev/null using the RedirectInputFile function
 							else{ //redirect input to dev/null
 								RedirectInputFile("/dev/null");
 							}
+
+							//check if the background process needs output file redirection
 							if(NeedsOutputRedirect(outputFile) == TRUE){
-								//printf("background output file is gonna be redirected!\n"); fflush(stdout);
+								//if it does need redirection, redirect stdout to the output file using the RedirectOutputFile function.
+								//check if redirect failed (will return 1 if failed).
 								if(RedirectOutputFile(outputFile) == 1){
+									//if redirect output failed, set child exit status to 1 and exit w this exit status
 									childExitStatus = 1;
 									exit(childExitStatus);
 								}
 							}
+
+							//else if the user did not enter any output redirect file, redirect output to /dev/null using the RedirectOutputFile function
 							else{ //redirect output to dev/null
 								RedirectOutputFile("/dev/null");
 							}
+							//call the Execute function (execvp() will be called within this function)
 							Execute(parsedUserInput, &childExitStatus);
 							break;	
 						default: //i am the parent
-							//printf("i am the parent!\n"); fflush(stdout);
-							//printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
-							//sleep(3);
-							//printf("parent (%d): waiting for child (%d) to terminate\n", getpid(), backgroundspawnpid); fflush(stdout);
-							//isBackgroundGlobal = TRUE;
+							//add the current background pid to the array of pids to be checked w waitpid (and WNOHANG) periodically later
 							backgroundPidArray[backgroundProcessCount] = backgroundspawnpid;
+
+							//print the pid of the background process just started
 							printf("background pid is %d\n", backgroundspawnpid); fflush(stdout);
+
+							//increment the background process counter
 							backgroundProcessCount++;
-							//pid_t actualBackgroundPID = waitpid(backgroundspawnpid, &childExitStatus, WNOHANG);
 							break;
 					}
 				}
 				else{ //fork bombed
+					//if fork bombed, print error message and exit w non-zero exit status
 					perror("FORK BOMB! EXITING!"); exit(1);
 				}
 			}
+
 			//if the user didn't indicate to run the process in the background or if
 			//they did want to run the process in the background but background mode
 			//isn't currently allowed
