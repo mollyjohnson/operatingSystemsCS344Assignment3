@@ -1291,7 +1291,8 @@ int main(){
 			parsedUserInput[numInputs] = NULL;
 
 			//if user indicated to run the process in the background AND background
-			//mode is currently allowed (i.e. user is NOT currently in foreground-only mode)
+			//mode is currently allowed (i.e. user is NOT currently in foreground-only mode),
+			//run in background
 			if((isBackground == TRUE) && (backgroundPossibleGlobal == TRUE)){
 				//create backgroundspawnpid and set to an impossible value (pids will never be negative numbers)
 				pid_t backgroundspawnpid = -5;
@@ -1319,7 +1320,7 @@ int main(){
 							sigaction(SIGINT, &SIGINT_action, NULL);
 
 							//set the SIGTSTP.sa_handler to SIG_IGN (only SIG_IGN and SIG_DFL can persist through exec calls).
-							//this will cause the background process to ignore any SIGINT signals and continue running.
+							//this will cause the background process to ignore any SIGTSTP signals and continue running.
 							SIGTSTP_action.sa_handler = SIG_IGN;
 							
 							//set sigaction too (tried just setting the handler to SIG_IGN, but the signal didn't get ignored properly until
@@ -1377,32 +1378,48 @@ int main(){
 				}
 			}
 
-			//if the user didn't indicate to run the process in the background or if
+			//if the user didn't indicate to run the process in the background OR if
 			//they did want to run the process in the background but background mode
-			//isn't currently allowed
+			//isn't currently allowed, run in foreground
 			else{
-				//printf("user wants foreground mode (or background and it's not allowed)\n"); fflush(stdout);
-				
+				//create foreground  spawnpid and set to an impossible value (pids will never be negative numbers)
 				pid_t spawnpid = -5;
 
+				//check the fork count to prevent fork bombing
 				if(forkCount < MAX_FORKS){
+					//call fork() to create a foreground child process
 					spawnpid = fork();
 					switch(spawnpid){
 						case -1:
+							//if fork returns -1, was an error, no child process created. print message and exit w a non-zero value
 							perror("Hull Breach!"); exit(1); //error, no child process created
 							break;
 						case 0: //i am the child
+							//if fork returns 0, are in the child process now.
+							
+							//set the SIGINT_action.sa_handler to SIG_DFL (only SIG_IGN and SIG_DFL can
+							//persist through exec calls). this will cause the foreground process to revert
+							//to the default action (terminating itself) upon receiveing a SIGINT signal.
 							SIGINT_action.sa_handler = SIG_DFL;
+
+							//set sigaction too (tried just setting the handler to SIG_DFL, but the signal didn't 
+							//get properly treated w the default action until i added the sigaction alternative
+							//signal handler part even though the sa_handler is being used and not sa_sigaction
 							sigaction(SIGINT, &SIGINT_action, NULL);
+
+							//set the SIGTSTP.sa_handler to SIG_IGN (only SIG_IGN and SIG_DFL can persist through exec calls)
+							//this will cause the foreground process to ignore any SIGTSTP signals and continue running.
 							SIGTSTP_action.sa_handler = SIG_IGN;
+
+							//set sigaction too (tried just setting the handler to SIG_IGN, but the signal
+							//didn't get ignored properly until i added the sigaction alternative
+							//signal handler part even though the sa_handler is being used and not sa_sigaction)
 							sigaction(SIGTSTP, &SIGTSTP_action, NULL);
 
-							//printf("i am the child!\n"); fflush(stdout);
-							//printf("child (%d): sleeping for 1 second\n", getpid()); fflush(stdout);
-							//sleep(2);
-							//printf("child (%d): converting into \'ls -a\'\n", getpid()); fflush(stdout);
+							//check if needs input file redirect
 							if(NeedsInputRedirect(inputFile) == TRUE){
-								//printf("foreground input file is gonna be redirected!\n");fflush(stdout);
+								//if does need input file redirect, call RedirectInputFile. Check for errors (if returns
+								//1, was an error. in that case, set exit status to 1 and exit w the non
 								if(RedirectInputFile(inputFile) == 1){
 									childExitStatus = 1;
 									exit(childExitStatus);
