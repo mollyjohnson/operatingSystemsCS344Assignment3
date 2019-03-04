@@ -590,40 +590,71 @@ int IsNewline(char *userInputIn){
 
 /*
 NAME
-
+getinputstring
 SYNOPSIS
-
+obtains user input as one long string from the user using getline
 DESCRIPTION
-
+receives userinputstring (blank) as a parameter. uses getline to get the user's input
+as one long string. checks if getline returns -1 to account for getline problems that
+can arise due to signals. checks if the user input is blank, a comment, or just a newline
+character. if it's none of those things, newline char added by getline will be removed
+and the getilne buffer will be copied into the user input string. if any of the input checks
+(isblank, iscomment, isnewline) return true, the user input string will instead be set to
+NO_ACTION (since these inputs should cause no action to be taken and the user just returned
+back to the command line for new input). the buffer then gets freed. returns void.
 */
 void GetInputString(char *userInputString){
 	//getline use adapted from my own work in OSU CS 344 Winter 2019 Assignment 2
+
+	//create buffer of size MAX_CHARS (2048 as given in the assignment instructions plus one for null terminator)
 	char *buffer;
 	size_t bufsize = MAX_CHARS;
 	size_t characters;
+
+	//malloc the buffer and check that malloc is successful
 	buffer = (char *)malloc(bufsize * sizeof(char));
+
+	//if buffer == NULL, malloc had an error. print error message and exit with value of 1.
 	if(buffer == NULL){
 		perror("GETLINE BUFFER ERROR, UNABLE TO ALLOCATE\n");
 		exit(1);
 	}
+
+	//keep looping (by using while(1)) to get the line of user input. check for if getline returns -1
+	//is used to make sure getline doesn't encounter any problems due to signals
 	while(1){
+		//call getline to get user input from stdin and put it in the buffer
 		characters = getline(&buffer, &bufsize, stdin);
+
+		//check if getline returned -1
 		if(characters == -1){
+			//if getline returned -1, use clearerr on stdin and let it loop back around
 			clearerr(stdin);
 		}
 		else{
+			//else if getline was successful (didn't return -1), go ahead and break out of loop
 			break;
 		}
 	}
 
+	//check if the user entered a blank line, a comment, or only a newline char
 	if((IsBlank(buffer) == FALSE) && (IsComment(buffer) == FALSE) && (IsNewline(buffer) == FALSE)){
+		//if user didn't enter any of these types of input, remove the newline char from the buffer,
+		//replacing it with a null terminating character
 		buffer[strcspn(buffer, "\n")] = '\0';
+
+		//copy the buffer with the newline char removed into the userinput string variable
 		strcpy(userInputString, buffer);
 	}
 	else{
+		//else if the user did enter either a blank line, comment, or only a newline char, don't
+		//do anything with the buffer. set the user input string to NO_ACTION (since those types
+		//of inputs should result in no action taking place and the user being returned to
+		//the command line and re-prompted).
 		strcpy(userInputString, NO_ACTION);
 	}
 	
+	//free the buffer that was malloc'd for getline and set to NULL
 	free(buffer);
 	buffer = NULL;
 }
