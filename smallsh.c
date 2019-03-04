@@ -552,31 +552,39 @@ int IsBlank(char *userInputIn){
 
 /*
 NAME
-
+iscomment
 SYNOPSIS
-
+checks if the user entered a comment
 DESCRIPTION
-
+receives user input string as a parameter. checks the first char of the user's input
+to see if it's a '#' char. if it is, return true (is a comment). else, return false.
 */
 int IsComment(char *userInputIn){
+	//check if first char of the user's input string is a '#' char
 	if(userInputIn[0] == '#'){
+		//if it is, return true
 		return TRUE;
 	}
+	//else, return false
 	return FALSE;
 }
 
 /*
 NAME
-
+isnewline
 SYNOPSIS
-
+checks if the user only hit enter (i.e. line is "blank" because the user only entered a newline char)
 DESCRIPTION
-
+receives user input string as a parameter. checks if the entire string is just one newline char. if
+it is, return true (is a "blank" line composed of only a newline char). else return false.
 */
 int IsNewline(char *userInputIn){
+	//call StringMatch to check if the user input string is just a newline character.
 	if(StringMatch(userInputIn, "\n") == TRUE){
+		//if it is, return true
 		return TRUE;
 	}
+	//else, return false
 	return FALSE;
 }
 
