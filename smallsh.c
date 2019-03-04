@@ -1130,11 +1130,14 @@ int IsNoAction(char *userInputIn){
 
 /*
 NAME
-
+main
 SYNOPSIS
-
+is the main function. creates/initializes variables, calls other needed functions, provides the main loop for getting user input.
 DESCRIPTION
-
+is the main function. sets up the sigaction structs for SIGINT and SIGTSTP. calls various other needed functions. keeps track
+of the exit status of the last foreground child, uses a fork counter to prevent fork bombs, keeps track of the background exit status,
+number of background processes and keeps their pids in an array, forks children for both background and foreground processes, etc.
+forks background and foreground child processes. receives no parameters. returns an int. 
 */
 int main(){
 	struct sigaction SIGINT_action = {{0}};
@@ -1386,8 +1389,9 @@ int main(){
 		free(parsedUserInput);
 		parsedUserInput= NULL;
 
+	//do while loop condition is to continue looping until the user has entered "exit" (i.e. IsExit is TRUE)
 	}while(IsExit(command) == FALSE);
-	//printf("DOES THIS PRINT AFTER THE USER HITS EXIT?\n"); fflush(stdout);
 		
+	//return 0 since this is the main function
 	return 0;
 }
