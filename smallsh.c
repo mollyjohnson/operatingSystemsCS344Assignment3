@@ -483,6 +483,14 @@ the home path, then chdir() to this home path. (didn't do error check on directo
 directory, all users will have a home path). returns void.
 */
 void ChangeDirBuiltInNoArgs(){
+	//using getenv and home to find the home directory path adapted from:
+	//https://stackoverflow.com/questions/31906192/how-to-use-environment-variable-in-a-c-program and
+	//http://man7.org/linux/man-pages/man3/getenv.3.html and
+	//https//www.tutorialspoint.com/c_standard_library/c_function_getenv.htm and
+	//https://stackoverflow.com/questions/9493234/chdir-to-home-directory
+	//chdir information adapted from:
+	//https://linux.die.net/man/2/chdir
+
 	//get home path using getenv()
 	char *homeDir = getenv("HOME");
 
@@ -499,7 +507,7 @@ DESCRIPTION
 is called when the user enters "cd" and one arg (or more, but any args beyond the first will be ignored). first
 arg is the relative or absolute file path the user is wanting to change directory to. will attempt to change to
 this specified directory using chdir(). if chdir() returns non-zero (i.e. fails), print error message to the
-user.
+user. returns void.
 */
 void ChangeDirBuiltInOneArg(char *directoryArg){
 	//attempt to change to the user-specified directory by calling chdir() with their first input arg. If
@@ -511,24 +519,34 @@ void ChangeDirBuiltInOneArg(char *directoryArg){
 
 /*
 NAME
-
+isblank
 SYNOPSIS
-
+checks if user entered a blank line
 DESCRIPTION
-
+takes in the user's input as a parameter. checks if all of the user's input are spaces (i.e. a "blank"
+line). i it is a blank line, returns true. else returns false.
 */
 int IsBlank(char *userInputIn){
+	//create counter for space chars and initialize to 0
 	int spaceCount = 0;
 
+	//loop through each char of the user input string
 	for(int j = 0; j < strlen(userInputIn); j++){
+		//if the current char is a space, increment the space count
 		if(userInputIn[j] == ' '){
 			spaceCount++;
 		}
 	}
 
+	//after looping through all of the characters in the user input string,
+	//check if the number of spaces is equal to the string length of the user input (minus one
+	//for the null-terminator).  else return false.
 	if(spaceCount == (strlen(userInputIn) - 1)){
+	//if these numbers are equal, the entire line was composed of just
+	//spaces (i.e. blank). return true.
 		return TRUE;
 	}
+	//else return false
 	return FALSE;
 }
 
