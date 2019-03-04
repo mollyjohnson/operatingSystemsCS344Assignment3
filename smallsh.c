@@ -173,11 +173,18 @@ void StatusBuiltInBackground(int backgroundChildExitStatusIn){
 
 /*
 NAME
-
+checkbackgroundprocesses
 SYNOPSIS
-
+checks background processes to see if any have exited or been terminated
 DESCRIPTION
-
+takes as parameters the number of background process counts, the array of background PIDs that are still
+processing (i.e. not exited or terminated by a signal), and the background child exit status. if the process
+count is 1 or more, will go through each background process and use waitpid with the WNOHANG option to check if
+the status for each pid is available (0 = process terminated) or if the status is not yet available. using the
+WNOHANG option will allow the waitpid function to return immediately whether the process being checked has
+terminated yet or not. if a background process has completed (terminated or exited), will print a message to
+the user stating which background pid is done and then call the status built in function to get either the
+exit value or terminating signal for that background process pid.
 */
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd){
 	if(*backgroundProcessCountIn > 0){
