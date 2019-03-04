@@ -75,6 +75,7 @@ void ChangeDirBuiltInNoArgs();
 void ChangeDirBuiltInOneArg(char *directoryArg);
 void Execute(char **parsedInput, int *childExitStatusIn);
 void StatusBuiltIn(int childExitStatusIn);
+void StatusSIGINT(int childExitStatusIn);
 void StatusBuiltInBackground(int backgroundChildExitStatusIn);
 int RedirectInputFile(char *inputFileIn);
 int RedirectOutputFile(char *outputFileIn);
@@ -83,6 +84,23 @@ int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
 void CatchSIGTSTP(int signo);
+
+/*
+NAME
+statusSIGINT
+SYNOPSIS
+checks if the process was terminated (does not check if exited normally)
+DESCRIPTION
+
+*/
+void StatusSIGINT(int childExitStatusIn){
+	if(WIFSIGNALED(childExitStatusIn) != 0){
+		//if process was terminated by a signal, use WTERMSIG to get the terminating signal number
+		//(WTERMSIG will return this number)
+		int termSignal = WTERMSIG(childExitStatusIn);
+		printf("terminated by signal %d\n", termSignal); fflush(stdout);
+	}
+}
 
 /*
 NAME
@@ -1447,15 +1465,10 @@ int main(){
 							//by a signal.
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
 
-							//if waitpid returned -1, was an error.  print error message and exit w a non-zero exit status
-							if(actualPID == -1){
-								perror("waitpid for foreground process error!\n"); exit(1);
-							}	
-
 							//since not using a signal handler in parent process for SIGINT (parent process is set to SIG_IGN) but child process is set
 							//to SIG_DFL for SIGINT signals and could thus be terminated, need to check and see if the child process was terminated and
 							//with what signal by checking the status function with the child exit status.
-							StatusBuiltIn(childExitStatus);
+							StatusSIGINT(childExitStatus);
 							break;
 					}
 				}
