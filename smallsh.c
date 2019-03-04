@@ -474,14 +474,19 @@ void Execute(char **parsedInput, int *childExitStatusIn){
 
 /*
 NAME
-
+changedirbuiltinnoargs
 SYNOPSIS
-
+changes the directory to home
 DESCRIPTION
-
+when the user doesn't enter any args and just enters "cd" (i.e. change directory), use getenv() to get
+the home path, then chdir() to this home path. (didn't do error check on directory because isn't a user-et
+directory, all users will have a home path.)
 */
 void ChangeDirBuiltInNoArgs(){
+	//get home path using getenv()
 	char *homeDir = getenv("HOME");
+
+	//change directory using chdir() and the home path found by getenv()
 	chdir(homeDir);
 }
 
