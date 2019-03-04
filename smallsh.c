@@ -661,35 +661,55 @@ void GetInputString(char *userInputString){
 
 /*
 NAME
-
+getpid
 SYNOPSIS
-
+gets the int pid of the current process and transforms it into the same pid but in string form
 DESCRIPTION
-
+takes no parameters. gets the int pid of the current process using getpid(). converts this into
+a string version of the pid using snprintf. returns the static string version of the process pid.
 */
 char *GetPID(){
-	//static so will remain after function exits
+
+	//create static string to hold the string version of the int pid (make it static so the string 
+	//will remain after function exits)
 	static char returnStringPID[] = "";
 	
-	//get parent process pid int
+	//get current process pid int
 	int pid = getpid();	
 
-	//convert int pid into string pid
+	//using snprintf to convert an int into a string is adapted from my own work previously 
+	//created for OSU CS 344 Winter term, assignment 2/13/19 
+
+	//convert int pid into string pid.
+	//get length of pid
 	int length = snprintf(NULL, 0, "%d", pid); fflush(stdout);
+
+	//create a temporary string variable for the string version of the PID and malloc it to length + 1 (for null term)
 	char *stringPID = malloc(length + 1);
+
+	//check that malloc was succcessful. if not successful (i.e. returns NULL), print error and exit w/ non-zero exit status
 	if(stringPID == NULL){
 		perror("ERROR, NOT ALLOCATED\n");
 		exit(1);
 	}
+
+	//use snprintf to set the string variable to the string version of the int pid
 	snprintf(stringPID, length + 1, "%d", pid); fflush(stdout);
+
+	//create another temporary string variable. copy the string version of the pid into another temporary variable 
+	//(so the original one that was malloc'd can be freed.  (when didn't use a malloc'd string had some errors when trying to use snprintf,
+	//and when tried to copy the malloc'd version directly into the static string to be returned also got errors, but worked when using a
+	//temporary variable).
 	char *copyStringPID = stringPID;
+
+	//copy the temporary string pid variable into the static string that will be returned
 	strcpy(returnStringPID, copyStringPID);
 
-	//free memory
+	//free memory created for the original temporary string variable that was malloc'd
 	free(stringPID);
 	stringPID = NULL;
 
-	//return string version of the int pid
+	//return static string version of the int pid
 	return returnStringPID;
 }
 
