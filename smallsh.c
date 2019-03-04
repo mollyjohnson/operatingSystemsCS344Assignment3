@@ -820,27 +820,56 @@ char *ReplaceString(char *str, char *orig, char *rep){
 NAME
 variableexpand
 SYNOPSIS
-
+performs variable expansion, replacing every "$$" with the pid
 DESCRIPTION
-
+takes in a variable string. creates an original long string, an original substring,
+the new substring to be inserted into the main string to replace the original substring,
+and the newly expanded string. will call the ReplaceString function to obtain the newly 
+expanded string. will set the string passed in to this new string using strcpy. returns void.
 */
 void VariableExpand(char *varIn){
+	//create original long string
 	char *str;
+
+	//create  original substring ("$$")
 	char *orig;
+
+	//create new substring for expansion (pid)
 	char *rep;
+
+	//malloc these strings
 	str = (char*)malloc((MAX_CHARS) * sizeof(char));
 	orig = (char*)malloc((MAX_CHARS) * sizeof(char));
 	rep = (char*)malloc((MAX_CHARS) * sizeof(char));
 
+	//check that malloc was successful (i.e. none of them == NULL)
+	if((str == NULL) || (orig == NULL) || (rep == NULL)){
+		//if any were not malloc'd successfully, print error message and exit w non-zero value
+		perror("VARIABLE EXPANSION STRING MALLOC ERROR\n");
+		exit(1);
+	}
+
+	//call GetPID function to get string version of the pid
 	char *pid = GetPID();
+
+	//copy the variable passed in as a parameter to the original long string
 	strcpy(str, varIn);
+
+	//set the original substring to "$$" (per the assignment instructions)
 	strcpy(orig, "$$");
+
+	//set the replacement string to the string version of the pid returned by GetPID()
 	strcpy(rep, pid);
 
+	//create the newly expanded string and set it to the string returned by the call to
+	//the ReplaceString function. pass in the main long string, original substring, and new
+	//replacement substring to the ReplaceString function
 	char *newStr = ReplaceString(str, orig, rep);
 
+	//copy the newly expanded string to the variable passed into this function
 	strcpy(varIn, newStr);
 
+	//free and set to NULL all of the temporary string and substring variables that were malloc'd
 	free(str);
 	str = NULL;
 	free(orig);
