@@ -322,16 +322,25 @@ int RedirectOutputFile(char *outputFileIn){
 
 /*
 NAME
-
+needsinputredirect
 SYNOPSIS
-
+checks if the current process needs its input redirected from stdin to a file or not
 DESCRIPTION
-
+takes in an input file name (or NO_ACTION if no input file was given by the user).
+Calls the StringMatch function to see if the input file name matches NO_ACTION. if
+it is, no input redirect is needed, function returns false. otherwise the user
+entered an input file name and the process' input will need to be redirected to the
+file so the function returns true.
 */
 int NeedsInputRedirect(char *inputFileIn){
+	//call StringMatch to check if the input file matches NO_ACTION (i.e. doesn't need
+	//input redirect) or if it doesn't match that (and thus the user entered an actual
+	//file name for redirection)
 	if(StringMatch(inputFileIn, NO_ACTION) == TRUE){
+		//if the input file name matches NO_ACTION, no redirect will be needed. return false.
 		return FALSE; 
 	}
+	//if the input file name did not match NO_ACTION, redirection will be needed. return true.
 	return TRUE;
 }
 
