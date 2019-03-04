@@ -1051,61 +1051,80 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 
 /*
 NAME
-
+isexit
 SYNOPSIS
-
+checks if the user entered exit
 DESCRIPTION
-
+receives the user input long string as a parameter. uses StringMatch to see if it matches "exit". if it does,
+returns true. else returns false.
 */
 int IsExit(char *userInputIn){
+	//use StringMatch to check if the user entered "exit"
 	if(StringMatch(userInputIn, EXIT) == TRUE){
+		//if user input and "exit" matches, return true
 		return TRUE;
 	}
+	//else return false
 	return FALSE;
 }
 
 /*
 NAME
-
+isstatus
 SYNOPSIS
-
+checks if the user entered status
 DESCRIPTION
-
+receives the user input long string as a parameter. uses StringMatch to see if it matches "status". if it does,
+returns true. else returns false.
 */
 int IsStatus(char *userInputIn){
+	//use StringMatch to check if the user entered "status"
 	if(StringMatch(userInputIn, STATUS) == TRUE){
+		//if user input and "status" matches, return true
 		return TRUE;
 	}
+	//else return false
 	return FALSE;
 }
 
 /*
 NAME
-
+ischangedir
 SYNOPSIS
-
+checks if the user entered cd (change directory)
 DESCRIPTION
-
+receives the user input long string as a parameter. uses StringMatch to see if it matches "cd". if it does,
+returns true. else returns false.
 */
 int IsChangeDir(char *userInputIn){
+	//use StringMatch to check if the user entered "cd"
 	if(StringMatch(userInputIn, CD) == TRUE){
+		//if user input and "cd" matches, return true
 		return TRUE;
 	}
+	//else return false
 	return FALSE;
 }
 
 /*
 NAME
-
+isnoaction
 SYNOPSIS
-
+checks if the user entered something that requires no action
 DESCRIPTION
-
+receives the user input long string as a parameter. uses StringMatch to see if it matches "NO_ACTION". if it
+does, returns true. else returns false. (note: the user's input has already been checked for if it's a blank line
+composed of all spaces, a commend i.e. a line beginning with #, or a blank line composed of just a newline char. if
+the user's input matched any of these things, the user's input string was set to NO_ACTION prior to being passed into
+this function).
 */
 int IsNoAction(char *userInputIn){
+	//use StringMatch to check if the user's input matches the string NO_ACTION
 	if(StringMatch(userInputIn, NO_ACTION) == TRUE){
+		//if user input and NO_ACTION matches, return true
 		return TRUE;
 	}
+	//else return false
 	return FALSE;
 }
 
