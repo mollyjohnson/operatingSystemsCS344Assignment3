@@ -267,7 +267,7 @@ int RedirectInputFile(char *inputFileIn){
 	}
 
 	//set dupresult to the value returned by dup2. pass in the source file descriptor and the
-	//stdinn value (which is 0) to redirect input from stdin to the source file descriptor.
+	//stdin value (which is 0) to redirect input from stdin to the source file descriptor.
 	int dupResult = dup2(sourceFD, 0);
 
 	//if dup2 returns -1, the redirect had an error. set exit status to 1.
@@ -281,25 +281,42 @@ int RedirectInputFile(char *inputFileIn){
 
 /*
 NAME
-
+redirectoutputfile
 SYNOPSIS
-
+redirects stdout to a specified output file
 DESCRIPTION
-
+takes in the output file name as a paremeter. opens the file (if created already) or creates
+one if not already created. if not able to open/create, set exit status to non-zero and print
+error message to the user. if able to be opened/created, uses dup2 to redirect stdout (1) to the
+target file descriptor. checks dup2 for error and if there's an error and if there's an error also
+sets the exit value to a non-zero number. returns the child exit status integer (0 if successful,
+non-zero if there are errors).
 */
 int RedirectOutputFile(char *outputFileIn){
+	//create temporary child exit status variable, set to 0 by default
 	int childExitStat = 0;
+
+	//set target file descriptor to value returned by open, open or create or truncate(i.e.
+	//overwrite previous file contents if was created)
 	int targetFD = open(outputFileIn, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+	//if open returned -1, was an error opening/creating/truncating the file. set exit
+	//status to 1 and print error message to the user.
 	if(targetFD == -1){
 		printf("cannot open %s for output\n", outputFileIn); fflush(stdout);
 		childExitStat = 1;
 	}
-	//printf("targetFD = %d\n", targetFD); fflush(stdout); 
+
+	//set dupresult to the value returned by dup2. pass in the target file descriptor and the
+	//stdout value (which is 1) to redirect output from stdout to the target file descriptor
 	int dupResult = dup2(targetFD, 1);
+
+	//if dup2 returns -1, the redirect had an error. set exit status to 1.
 	if(dupResult == -1){
-		//printf("target dup2() error\n"); fflush(stdout);
 		childExitStat = 1;
 	}	
+
+	//return the child exit status
 	return childExitStat;
 }
 
