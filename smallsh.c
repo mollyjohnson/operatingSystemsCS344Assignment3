@@ -480,7 +480,7 @@ changes the directory to home
 DESCRIPTION
 when the user doesn't enter any args and just enters "cd" (i.e. change directory), use getenv() to get
 the home path, then chdir() to this home path. (didn't do error check on directory because isn't a user-et
-directory, all users will have a home path.)
+directory, all users will have a home path). returns void.
 */
 void ChangeDirBuiltInNoArgs(){
 	//get home path using getenv()
@@ -492,13 +492,18 @@ void ChangeDirBuiltInNoArgs(){
 
 /*
 NAME
-
+changedirbuiltinonearg
 SYNOPSIS
-
+changes directory to a user-specified directory
 DESCRIPTION
-
+is called when the user enters "cd" and one arg (or more, but any args beyond the first will be ignored). first
+arg is the relative or absolute file path the user is wanting to change directory to. will attempt to change to
+this specified directory using chdir(). if chdir() returns non-zero (i.e. fails), print error message to the
+user.
 */
 void ChangeDirBuiltInOneArg(char *directoryArg){
+	//attempt to change to the user-specified directory by calling chdir() with their first input arg. If
+	//chdir() returns non-zero, print message to user that chdir() to their specified directory has failed.
 	if(chdir(directoryArg) != 0){
 		printf("chdir() to your specified directory has failed, no such directory there.\n"); fflush(stdout);
 	}
