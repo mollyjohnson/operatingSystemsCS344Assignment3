@@ -82,7 +82,6 @@ void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int
 int NeedsOutputRedirect(char *outputFileIn);
 int NeedsInputRedirect(char *inputFileIn);
 void CheckBackgroundProcesses(int *backgroundProcessCountIn, int backgroundPidArrayIn[], int *childExitStatusBckd);
-void SigintSignalStatusCheck(int childExitStatusIn);
 void CatchSIGTSTP(int signo);
 
 /*
@@ -97,7 +96,7 @@ if it is, prints message saying foreground-only mode is being entered. prints me
 printf() to make sure signal handler is re-entrant. sets the background possible global boolean to false. if the background
 mode possible boolean was already false, prints a message to the user that they're exiting the foreground-only mode. also
 uses write instead of printf to prevent re-entrancy problems (printf isn't reentrant whereas write is). sets the background
-possible global boolean to true.
+possible global boolean to true. returns void.
 */
 void CatchSIGTSTP(int signo){
 	//check if the background mode is currently possible (i.e. if backgroundPossibleGlobal is true)
@@ -128,41 +127,45 @@ void CatchSIGTSTP(int signo){
 
 /*
 NAME
-
+statusbuiltinbackground
 SYNOPSIS
-
+gives the status of the last background process
 DESCRIPTION
-
-*/
-void SigintSignalStatusCheck(int childExitStatusIn){
-	if(WIFSIGNALED(childExitStatusIn) != 0){
-		int termSig = WTERMSIG(childExitStatusIn);
-		printf("terminated by signal %d\n", termSig); fflush(stdout);
-	}
-}
-
-/*
-NAME
-
-SYNOPSIS
-
-DESCRIPTION
-
+takes the background status integer variable in as a parameter. uses WIFEXITED and WIFSIGNALED
+macros to determine if the background process exited normally (and if so what was the exit
+value) or if it was terminated by a signal (and if so what was the terminating signal). if
+neither one is true, prints an error and exits w a non-zero exit value. returns void. note:
+a process can have either an exit status or a terminating signal but not both!
 */
 void StatusBuiltInBackground(int backgroundChildExitStatusIn){
+	//additional information on how to obtain exit status and terminating signal information using WIFEXITED
+	//and WEXITSTATUS and WIFSIGNALED and  WTERMSIG adapted from:
+	//https://stackoverflow.com/questions/27306764/capturing-exit-status-code-of-child-process and
+	//https://www.ibm.com/support/knowledgecenter/en/SSB23S_1.1.0.15/gtpc2/cpp_wifexited.html and
+	//https://www.ibm.com/support/knowledgecenter/en/SSB23S_1.1.0.15/gtpc2/cpp_wtermsig.html and
+	//https://www.ibm.com/support/knowledgecenter/en/SSB23S_1.1.0.15/gtpc2/cpp_wexitstatus.html
+	
+	//if WIFEXITED returns non-zero, means process terminated normally
 	if(WIFEXITED(backgroundChildExitStatusIn) != 0){
-		//printf("the background process exited normally\n"); fflush(stdout);
+		//if process terminated normally, use WEXITSTATUS to get the actual exit value
+		//(WEXITSTATUS will return this number)
 		int backgroundExitStatus = WEXITSTATUS(backgroundChildExitStatusIn);
-		//printf("the exit status of the background process was: %d\n", backgroundExitStatus); fflush(stdout);
+
+		//print the exit value of the background process that terminated normally
 		printf("background exit value %d\n", backgroundExitStatus); fflush(stdout);
 	}
+	//if WIFSIGNALED returns non-zero, means process was terminated by a signal.
 	else if(WIFSIGNALED(backgroundChildExitStatusIn) != 0){
-		//printf("the background process was terminated by a signal\n"); fflush(stdout);
+		//if process was terminated by a signal, use WTERMSIG to get the terminating signal number
+		//(WTERMSIG will return this number)
 		int backgroundTermSignal = WTERMSIG(backgroundChildExitStatusIn);
-		//printf("the terminating signal of the background process was: %d\n", backgroundTermSignal); fflush(stdout);
+
+		//print the signal number of the background process that was terminated by the signal
 		printf("terminated by signal %d\n", backgroundTermSignal); fflush(stdout);
 	}
+	//if neither one returns non-zero, is a major problem (one and only one of them should be returning non-zero)
 	else{
+		//if somehow neither WIFEXITED nor WIFSIGNALED returned non-zero, print the error and exit w a non-zero exit value.
 		perror("neither WIFEXITED nor WIFSIGNALED returned a non-zero value, major error in your status checking!\n");
 		exit(1);
 	}
