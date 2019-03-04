@@ -903,75 +903,123 @@ int StringMatch(char *string1, char *string2){
 
 /*
 NAME
-
+getargs
 SYNOPSIS
-
+parses the user input string into separate pieces
 DESCRIPTION
-
+takes the long user input string and parses it into arguments, input file (if there), output file (if there), 
+and sets the background bool to either true or false (depending on if the user entered '&' as their last arg
+or not). puts the parsed arguments into an array of strings (parsedInput). returns the number of inputs. 
 */
 int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *outputFileIn, int *isBackgroundBool){
+	//use of strtok to parse input with a given token (i.e. the "spaces" between input arguments for this assignment)
+	//is adapted from my own work for OSU cs 344 assignment 2 winter 2019 2/13/19 and
+	//http://www.cplusplus.com/reference/cstring/strtok/
+
+	//initialize input count to 0
 	int inputCount = 0;
+
+	//initialize is output file bool to false
 	int isOutFile = FALSE;
+
+	//initialize is input file bool to false
 	int isInFile = FALSE;
-	//int isBackground = FALSE;
+
+	//create "space" string and a string for the "token" to be used by strtok
 	char *space = " ";
 	char *token;
 
+	//use strtok to split the string into tokens (each token is a piece of input) using
+	//the space " " chars as delimiters between each argument to be parsed.
 	token = strtok(userInputString, space);
+
+	//malloc the first parsed input in the parsed input array of strings
 	parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
 
+	//check that it malloc'd correctly. if not, print error and exit w non-zero value
 	if(parsedInput[inputCount] == NULL){
 		perror("USER INPUT MALLOC ERROR\n");
 		exit(1);
 	}
 
+	//copy the input arg (token) into the current empty string in the array of strings
 	strcpy(parsedInput[inputCount], token);
+
+	//use strstr to check if the current input from the user needs variable expansion.
+	//if strstr == NULL, doesn't need expansion. if returns not equal to NULL, call
+	//the variable expand function to expand any instance of $$ in the input arg to
+	//the pid
 	if(strstr(parsedInput[inputCount], "$$") != NULL){
 		VariableExpand(parsedInput[inputCount]);
 	}
+
+	//increment the input count
 	inputCount++;
 
+	//loop through entire user input string (i.e. while the token != NULL)
 	while(token != NULL){
+		//get the next arg using space " " as a delimiter
 		token = strtok(NULL, space);
+
+		//check that the next arg isn't NULL
 		if(token != NULL){
+			//if next arg isn't NULL, check if it's  "<" (which would mean the next arg is going to be an input file for redirection)
 			if(StringMatch(token, "<") == TRUE){
+				//if the current arg is a "<", set input file bool to true so next arg will go to input file string instead of arg array
 				isInFile = TRUE;		
 			}
+			//if the current arg is ">", set the output file bool to true so next arg will go to output file string instead of arg array
 			else if(StringMatch(token, ">") == TRUE){
 				isOutFile = TRUE;	
 			}
+			//else if current arg isn't "<" or ">" and thus isn't an indication for upcoming redirection but rather just a regular argument
 			else{
+				//if the input file bool is true, this arg is an input file for redirection
 				if(isInFile == TRUE){
+					//copy this token arg into the input file string instead of the parsed args array
 					strcpy(inputFileIn, token);
 
+					//check if this input file requires variable expansion. if so, call VariableExpand
 					if(strstr(inputFileIn, "$$") != NULL){
 						VariableExpand(inputFileIn);
 					}
+					//reset input file bool to false
 					isInFile = FALSE;
 				}
+				//if the output file bool is true, this arg is an output file for redirection
 				else if(isOutFile == TRUE){
+					//copy this token arg into the output file string instead of the parsed args array
 					strcpy(outputFileIn, token);
 
+					//check if this output file requires variable expansion. if so, call VariableExpand
 					if(strstr(outputFileIn, "$$") != NULL){
 						VariableExpand(outputFileIn);
 					}
 
+					//reset output file bool to false
 					isOutFile = FALSE;
 				}
+				//else if the current arg is neither an input file or an output file
 				else{
+					//malloc the next arg in the parsed input array
 					parsedInput[inputCount] = malloc((MAX_CHARS) * sizeof(char));
 
+					//check that malloc was successful. if not successful (== NULL), print error message
+					//and exit with a non-zero value.
 					if(parsedInput[inputCount] == NULL){
 						perror("USER INPUT MALLOC ERROR\n");
 						exit(1);
 					}
 
+					//use strcpy to copy the current arg (i.e. "token) into the next string in the parsed input array of strings.
 					strcpy(parsedInput[inputCount], token);
 
+					//check if this arg needs variable expansion or not. if it does (i.e. != NULL), call VariableExpand
 					if(strstr(parsedInput[inputCount], "$$") != NULL){
 						VariableExpand(parsedInput[inputCount]);
 					}
 
+					//increment the input count
 					inputCount++;
 				}
 				
@@ -979,15 +1027,25 @@ int GetArgs(char **parsedInput, char *userInputString, char *inputFileIn, char *
 		}
 	}
 
+	//check if the number of inputs is greater than one (because the user can't enter nothing but a background signal, would be nothing to do and should
+	//just return an error when attempted to be called by execvp()).
 	if(inputCount > 1){
+		//if there's more than one input, check if the last input matches "&" (i.e. the background indicator) using StringMatch.
 		if(StringMatch(parsedInput[inputCount-1], "&") == TRUE){
+			//if the last input matches "&", set the background bool to TRUE
 			*isBackgroundBool = TRUE;
+
+			//free the last element of the parsed input array of input strings and set it to NULL (since it was equal to "&" which shouldn't be passed to
+			//execvp() or any built in command and should just be used to set the bool variable)
 			free(parsedInput[inputCount - 1]);
 			parsedInput[inputCount - 1] = NULL;
+
+			//decrement the input count since the last input arg was removed from the parsed inputs array of strings
 			inputCount--;
 		}
 	}
 
+	//return the number of inputs
 	return inputCount;
 }
 
