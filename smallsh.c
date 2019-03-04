@@ -91,7 +91,9 @@ statusSIGINT
 SYNOPSIS
 checks if the process was terminated (does not check if exited normally)
 DESCRIPTION
-
+will use SIFSIGNALED and WTERMSIG to see if the process was terminated by a signal
+(and if so, which one). added because the parent process needs to check for terminated child
+signals after every waitpid() without also checking for an exit status.
 */
 void StatusSIGINT(int childExitStatusIn){
 	if(WIFSIGNALED(childExitStatusIn) != 0){
@@ -392,20 +394,30 @@ exitbuiltin
 SYNOPSIS
 cleans up any remaining processes running (kills them) and exits with the correct exit status
 DESCRIPTION
-
+checks each foreground process and any remaining background processes and kills them with SIGKILL
 */
 void ExitBuiltIn(int foregroundProcessCountIn, int backgroundProcessCountIn, int backgroundPidArrayIn[], int foregroundPidArrayIn[], int childExitStatusIn){
-	//printf("hey you're in the EXIT function correctly\n"); fflush(stdout);	
+	//check if there's 1 or more foreground processes
 	if(foregroundProcessCountIn > 0){
+
+		//loop through each foreground process and try to kill it (didn't appear to have
+		//any harmful effects from trying to kill processes that had already terminated or exited,
+		//just did nothing, so didn't go through array each time a process ended or was terminated
+		//to remove it from the array). instructor brewster said a static fixed array of 128 args would
+		//be sufficient for storing process pids and that it didn't have to be dynamic.
 		for(int k = 0; k < foregroundProcessCountIn; k++){
 			kill(foregroundPidArrayIn[k], SIGKILL);
 		}
 	}
+	//check if there's 1 or more background processes
 	if(backgroundProcessCountIn > 0){
+		//loop through each background process and try to kill it (this array was already created dynamically
+		//to account for the periodic checking with waitpid() and WNOHANG).
 		for(int m = 0; m < backgroundProcessCountIn; m++){
 			kill(backgroundPidArrayIn[m], SIGKILL);
 		}
 	}
+	//exit w the exit status
 	exit(childExitStatusIn);
 }
 
@@ -1457,6 +1469,7 @@ int main(){
 							Execute(parsedUserInput, &childExitStatus);
 							break;
 						default: //i am the parent
+							//increment foreground process count and save the pid for the exit built in function
 							foregroundPidArray[foregroundProcessCount] = spawnpid;
 							foregroundProcessCount++;
 
