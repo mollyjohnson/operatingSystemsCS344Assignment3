@@ -880,16 +880,24 @@ void VariableExpand(char *varIn){
 
 /*
 NAME
-
+stringmatch
 SYNOPSIS
-
+checks if two strings match each other
 DESCRIPTION
-
+receives two strings as parameters. uses strcmp to compare the two strings. if they match, returns
+true. else returns false. created this function because was getting tripped up at times with how
+strcmp returns 0 if two strings match, while i have 0 set to false everywhere else in the program so
+it seemed like should be returning non-zero. after making mistakes with it a few times decided to create
+my own function to check strings.
 */
 int StringMatch(char *string1, char *string2){
+	//use strcmp to see if string one and two are equal. (if equal, strcmp will return 0. will return
+	//non-zero if the two strings are not equal.
 	if(strcmp(string1, string2) == 0){
+		//if the two strings are a match, return true
 		return TRUE;
 	}
+	//if the two strings are not a match, return false
 	return FALSE;
 }
 
