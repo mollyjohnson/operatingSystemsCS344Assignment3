@@ -715,62 +715,110 @@ char *GetPID(){
 
 /*
 NAME
-
+replacestring
 SYNOPSIS
-
+replaces a specified substring in a string with another specified substring
 DESCRIPTION
-
+takes in three strings, one (str) which is the complete string, another (orig)
+which is the substring that's to be replaces, and another (rep) that is the replacement
+string meant to be inserted in the place of the original substring. returns the
+new string that contains the replacement substring in place of the original substring.
 */
 char *ReplaceString(char *str, char *orig, char *rep){
+	//replace string method adapted from:
+	//Adapted from: https://stackoverflow.com/questions/32413667/replace-all-occurrences-of-a-substring-in-a-string-in-c and
+	//https://www.geeksforgeeks.org/c-program-replace-word-text-another-given-word/
+
+	//create result string (will be a temporary string variable to hold the newly expanded string with the replacement substring)
 	char *result;
+
+	//create two counter variables and initialize to zero
 	int i = 0;
 	int cnt = 0;
 
-	//save lengths of the replacement substring (pid) and the original substring ("$$")
+	//save original length of the replacement substring (string version of the pid)
 	int newWlen = strlen(rep);
+
+	//save the original length of the original substring to be replaced ("$$")
 	int oldWlen = strlen(orig);
 
-	//go through each char in the original long string, to check for occurrences of the original substring ("$$")
+	//loop through each char in the original long string for the entire length of the string (i.e. until null term is reached), 
+	//checking for occurrences of the original substring ("$$")
 	for(i = 0; str[i] != '\0'; i++){
+		//strstr information adapted from:
+		//https://www.tutorialspoint.com/c_standard_library/c_function_strstr.htm
+		
+		//strstr returns a pointer to the first occurence in the main string of any of
+		//the sequence of characters specified in the substring to be searched for. returns
+		//null if no sequence found. so in this case, strstr shoud return null if no instances
+		//of $$ are found. Should return pointer to the first occurrence in the main string of the substring.
 		if (strstr(&str[i], orig) == &str[i]){
+			//if an occurrence of '$' was found, increment the substring count (cnt)
 			cnt++;
+
+			//set the i loop variable to add the old length of the substring ('$$') - 1.
 			i += oldWlen - 1;
 		}
 	}
 
+	//malloc the result string to the appropriate size using the i loop variable, cnt '$' counter
+	//variable, and length of the replacement string (pid) minus the length of the original substring ("$$")
 	result = (char *)malloc(i + cnt *(newWlen - oldWlen) + 1);
+
+	//reset the i looping variable to zero.
 	i = 0;
 
 	//replace each occurrence of the orig substring("$$") with the new subtsring (pid)
+	//loop through the entire string
 	while (*str){
+		//if strstr returns a pointer to the first occurrence of the "$$" substring (instead of null)
 		if(strstr(str, orig) == str){
+			//copy the replacement substring into the result string, starting at the pointer where
+			//"$$" was first found.
 			strcpy(&result[i], rep);
+
+			//set i to add the new length to itself (i.e. the length of the new replacement
+			//substring, the pid)
 			i += newWlen;
+			
+			//set the string to add the old length to itself (i.e. the length of the original
+			//substring, "$$"
 			str += oldWlen;
 		}
+		//if strstr returns null, set the next char after the current one in result to the next
+		//char in the complete original string (since will need the rest of the original string added to
+		//the end of the newly inserted substring)
 		else{
 			result[i++] = *str++;
 		}
 	}
 
 	//set result to a new string to be returned so result memory can be freed
+	//set last char value in result to a null terminator
 	result[i] = '\0';
+
+	//create another static string of maxchars + 1 (for null term). make statis so it persists
+	//after the function exits, and memset it to null terminators.
 	static char returnStr[MAX_CHARS + 1];
 	memset(returnStr, '\0', sizeof(returnStr));
+
+	//use strcpy to copy the malloc'd result string (the new string with the substring replacement/
+	//expansion) into the static string
 	strcpy(returnStr, result);
 
-	//free memory
+	//free memory from the malloc'd temp string and set to NULL
 	free(result);
 	result = NULL;
 
-	//return newly expanded string
+	//return newly expanded static string, which should now contain the string version of the pid
+	//in place of every instance of "$$"
 	return returnStr;
 
 }
 
 /*
 NAME
-
+variableexpand
 SYNOPSIS
 
 DESCRIPTION
