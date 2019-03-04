@@ -1419,83 +1419,69 @@ int main(){
 							//check if needs input file redirect
 							if(NeedsInputRedirect(inputFile) == TRUE){
 								//if does need input file redirect, call RedirectInputFile. Check for errors (if returns
-								//1, was an error. in that case, set exit status to 1 and exit w the non
+								//1, was an error. in that case, set exit status to 1 and exit w the non-zero exit status
 								if(RedirectInputFile(inputFile) == 1){
 									childExitStatus = 1;
 									exit(childExitStatus);
 								}
 								
 							}
+							//check if needs output file redirect
 							if(NeedsOutputRedirect(outputFile) == TRUE){
-								//printf("foreground output file is gonna be redirected!\n"); fflush(stdout);
+								//if does need output file redirect, call RedirectInputFile. Check for errors (if returns
+								//1, was an error. in that case, set exit status to 1 and exit w the non-zero exit status
 								if(RedirectOutputFile(outputFile) == 1){
 									childExitStatus = 1;
 									exit(childExitStatus);
 								}
 							}
+							//call the Execute function (execvp() will be called within this function)
 							Execute(parsedUserInput, &childExitStatus);
 							break;
 						default: //i am the parent
-							//printf("i am the parent!\n"); fflush(stdout);
-							//printf("parent %d: sleeping for 2 seconds\n", getpid()); fflush(stdout);
-							//sleep(3);
-							//printf("parent (%d): waiting for child(%d) to terminate\n", getpid(), spawnpid); fflush(stdout);
-							//isForegroundGlobal = TRUE;
 							foregroundPidArray[foregroundProcessCount] = spawnpid;
 							foregroundProcessCount++;
+
+							//use waitpid with 0 (i.e. with no WNOHANG flag). no WNOHANG flag will mean waitpid will wait to return the user
+							//to the command line until the process w the specified pid (spawnpid) has exited or been terminated
+							//by a signal.
 							pid_t actualPID = waitpid(spawnpid, &childExitStatus, 0);
+
+							//if waitpid returned -1, was an error.  print error message and exit w a non-zero exit status
 							if(actualPID == -1){
-								perror("waitpid for background process error!\n"); exit(1);
+								perror("waitpid for foreground process error!\n"); exit(1);
 							}	
-							//printf("parent (%d): child(%d) terminated, exiting!\n", getpid(), actualPID); fflush(stdout);
-							
-							//SigintSignalStatusCheck(childExitStatus);
+
+							//since not using a signal handler in parent process for SIGINT (parent process is set to SIG_IGN) but child process is set
+							//to SIG_DFL for SIGINT signals and could thus be terminated, need to check and see if the child process was terminated and
+							//with what signal by checking the status function with the child exit status.
 							StatusBuiltIn(childExitStatus);
 							break;
 					}
 				}
 				else{ //fork bombed
+					//if fork bombed ( fork count is > max forks), print error and exit w non-zero value
 					perror("FORK BOMB! EXITING!"); exit(1);  
 				}
 			}
 		}
 
-		//printf("num foreground processes run: %d\n", foregroundProcessCount); fflush(stdout);
-		//printf("num background processes run: %d\n", backgroundProcessCount); fflush(stdout);
-
-		/*
-		if(foregroundProcessCount > 0){
-			for(int k = 0; k < foregroundProcessCount; k++){
-				printf("foreground process %d pid: %d\n", k + 1, foregroundPidArray[k]); fflush(stdout);
-			}
-		}
-		printf("THE BACKGROUND PROCESS COUNT IS: %d\n", backgroundProcessCount); fflush(stdout); 
-		if(backgroundProcessCount > 0){
-			for(int m = 0; m < backgroundProcessCount; m++){
-				printf("background process %d pid: %d\n", m + 1, backgroundPidArray[m]); fflush(stdout);
-			}
-		}
-		*/
-
+		//call CheckBackgroundProcesses (will use waitpid() w WNOHANG to loop through array of background pids and
+		//clean up any that have exited or been terminated and report their exit value or terminating signal)
 		CheckBackgroundProcesses(&backgroundProcessCount, backgroundPidArray, &backgroundExitStatus);
 
+		//memset the command to null terminators and set to the first command from the user (need command since was
+		//created outside the do while loop and thus can persist to be checked in the do while loop conditional)
 		memset(command, '\0', sizeof(command));
 		strcpy(command, parsedUserInput[0]);
 
-		//printf("command: %s\n", parsedUserInput[0]); fflush(stdout); 
-		/*
-		for(int k = 1; k < numInputs; k++){
-			printf("arg %d: %s\n", k, parsedUserInput[k]); fflush(stdout); 
-		}
-		*/
-		//printf("input file: %s\n", inputFile); fflush(stdout); 
-		//printf("output file %s\n", outputFile); fflush(stdout); 
-		//printf("background status is: %d\n", isBackground); fflush(stdout); 
-
+		//free all the parsed user input array strings and set to null
 		for(int i = 0; i < numInputs; i++){
 			free(parsedUserInput[i]);
 			parsedUserInput[i] = NULL;
 		}
+
+		//free the parsed user input array itself and set to null
 		free(parsedUserInput);
 		parsedUserInput= NULL;
 
